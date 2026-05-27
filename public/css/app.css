@@ -1,0 +1,139 @@
+/* ----------------------------------------------------------------
+   RaktSetu — design system (ported from React mockups)
+   Loaded together with Tailwind CDN.
+-----------------------------------------------------------------*/
+
+:root {
+    --rs-primary:      #C8232C;
+    --rs-primary-dark: #8B1A20;
+    --rs-primary-soft: #FCE9EA;
+    --rs-ink:          #1A1A1A;
+    --rs-muted:        #6B7280;
+    --rs-line:         #E5E7EB;
+    --rs-bg:           #FAFAFA;
+
+    --rs-success:  #10B981;
+    --rs-success-bg: #D1FAE5;
+    --rs-success-fg: #065F46;
+    --rs-warn:     #F59E0B;
+    --rs-warn-bg:  #FEF3C7;
+    --rs-warn-fg:  #92400E;
+    --rs-danger:   #DC2626;
+    --rs-danger-bg:#FEE2E2;
+    --rs-danger-fg:#991B1B;
+    --rs-info:     #3B82F6;
+    --rs-info-bg:  #DBEAFE;
+    --rs-info-fg:  #1E40AF;
+    --rs-purple:   #7C3AED;
+    --rs-purple-bg:#EDE9FE;
+    --rs-purple-fg:#5B21B6;
+}
+
+html, body { height: 100%; }
+body {
+    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    color: var(--rs-ink);
+    background: var(--rs-bg);
+    font-feature-settings: 'ss01', 'cv11';
+}
+
+/* ---------- Tabular numerics ---------- */
+.tabular-nums { font-variant-numeric: tabular-nums; }
+
+/* ---------- Primary button ---------- */
+.rs-btn-primary {
+    background: var(--rs-primary);
+    color: white;
+    box-shadow: 0 1px 2px rgba(139, 26, 32, 0.25), inset 0 -1px 0 rgba(0,0,0,0.08);
+    transition: background 0.12s ease;
+}
+.rs-btn-primary:hover  { background: #B11D26; }
+.rs-btn-primary:active { background: var(--rs-primary-dark); }
+.rs-btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* ---------- Pulse for critical badges ---------- */
+@keyframes rs-pulse {
+    0%, 100% { transform: scale(1);   opacity: 1; }
+    50%      { transform: scale(1.6); opacity: 0; }
+}
+.rs-pulse { position: relative; }
+.rs-pulse::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    background: currentColor;
+    opacity: 0.4;
+    animation: rs-pulse 1.8s ease-out infinite;
+}
+
+/* ---------- Ping for hero map pins ---------- */
+@keyframes rs-ping {
+    0%   { transform: scale(0.6); opacity: 1; }
+    100% { transform: scale(1.4); opacity: 0; }
+}
+.rs-ping        { animation: rs-ping 3.2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+.rs-ping-slow   { animation: rs-ping 4.6s cubic-bezier(0.4, 0, 0.6, 1) infinite; animation-delay: 0.6s; }
+.rs-ping-slower { animation: rs-ping 6.0s cubic-bezier(0.4, 0, 0.6, 1) infinite; animation-delay: 1.2s; }
+
+/* ---------- Floating pins ---------- */
+@keyframes rs-float {
+    0%, 100% { transform: translate(-50%, -50%) translateY(0); }
+    50%      { transform: translate(-50%, -50%) translateY(-6px); }
+}
+.rs-float { animation: rs-float 4s ease-in-out infinite; }
+
+/* ---------- Gentle entry ---------- */
+@keyframes rs-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: none; }
+}
+.rs-in { animation: rs-in 0.35s ease both; }
+
+/* ---------- Status timeline filled bar ---------- */
+.rs-step-done    { background: var(--rs-ink);     color: white; border-color: var(--rs-ink); }
+.rs-step-active  { background: var(--rs-primary); color: white; border-color: var(--rs-primary); }
+.rs-step-pending { background: white; color: #9CA3AF; border-color: var(--rs-line); }
+
+/* ---------- Subtle scrollbar ---------- */
+::-webkit-scrollbar              { width: 10px; height: 10px; }
+::-webkit-scrollbar-track        { background: transparent; }
+::-webkit-scrollbar-thumb        { background: rgba(0,0,0,0.12); border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover  { background: rgba(0,0,0,0.2); }
+
+/* ---------- Flash banner ---------- */
+.rs-flash-success {
+    background: var(--rs-success-bg); color: var(--rs-success-fg);
+    border: 1px solid #A7F3D0;
+}
+.rs-flash-error {
+    background: var(--rs-danger-bg); color: var(--rs-danger-fg);
+    border: 1px solid #FECACA;
+}
+
+/* ---------- Disable native select arrow ---------- */
+select {
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: none;
+}
+
+/* ---------- Map placeholder ---------- */
+.rs-map-bg {
+    background-image:
+        linear-gradient(rgba(229,231,235,0.7) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(229,231,235,0.7) 1px, transparent 1px);
+    background-size: 36px 36px;
+    background-color: #F3F4F6;
+}
+
+/* ---------- Focus ring ---------- */
+input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible {
+    outline: none;
+}
+
+/* ---------- Compatibility matrix cells ---------- */
+.rs-compat-yes { background: var(--rs-primary); }
+.rs-compat-no  { background: var(--rs-line); }
