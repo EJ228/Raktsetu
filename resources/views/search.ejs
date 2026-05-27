@@ -1,0 +1,80 @@
+<%- include('partials/landingNav') %>
+
+<section class="max-w-[1200px] mx-auto px-5 md:px-8 py-10 md:py-16">
+    <h1 class="font-bold text-ink tracking-tight" style="font-size:clamp(28px,3.5vw,40px);letter-spacing:-0.025em;">Find blood near you</h1>
+    <p class="mt-2 text-[15px] text-[#6B7280]">Search verified blood banks by group and city. Live inventory.</p>
+
+    <!-- Filter -->
+    <form action="/search" method="GET" class="mt-6 bg-white rounded-[14px] border border-[#E5E7EB] p-2 flex flex-wrap items-center gap-2" style="box-shadow: 0 1px 2px rgba(16,24,40,0.04);">
+        <select name="bloodGroup" class="flex-1 min-w-[140px] h-11 px-3 rounded-[10px] text-[14px] outline-none">
+            <option value="">Any blood group</option>
+            <% ['A+','A-','B+','B-','AB+','AB-','O+','O-'].forEach(function(g){ %>
+                <option value="<%= g %>" <%= query.bloodGroup === g ? 'selected' : '' %>><%= g %></option>
+            <% }); %>
+        </select>
+        <input type="text" name="city" value="<%= query.city %>" placeholder="City — e.g. Guwahati" class="flex-1 min-w-[160px] h-11 px-3 rounded-[10px] text-[14px] outline-none border border-[#E5E7EB]" />
+        <button type="submit" class="rs-btn-primary h-11 px-5 rounded-[10px] font-semibold text-[14px]">Search</button>
+    </form>
+
+    <!-- Results -->
+    <div class="mt-8 grid gap-4">
+        <% if (results.length === 0) { %>
+            <div class="py-4">
+                <%- include('partials/emptyState', {
+                    context: 'SEARCH',
+                    icon: 'search',
+                    tone: 'blue',
+                    title: 'No banks match these filters',
+                    desc: 'Try removing a filter or expanding the radius. Component-specific stocks (platelets, FFP) refresh every 30 minutes.',
+                    primaryBtn: { text: 'Clear filters', href: '/search', icon: 'x' },
+                    secondaryBtn: { text: 'Expand radius', href: '#' }
+                }) %>
+            </div>
+        <% } else { results.forEach(function(b){ %>
+            <div class="bg-white rounded-[14px] border border-[#E5E7EB] p-6">
+                <div class="flex flex-wrap items-start gap-4 justify-between">
+                    <div class="flex items-start gap-3">
+                        <span class="h-11 w-11 rounded-[10px] bg-[#FAFAFA] grid place-items-center">
+                            <%- include('partials/icon', { name: 'hospital', size: 20 }) %>
+                        </span>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h3 class="font-semibold text-ink text-[17px]"><%= b.name %></h3>
+                                <% if (b.verified) { %>
+                                    <span class="inline-flex items-center gap-1 text-[10.5px] font-semibold px-1.5 py-0.5 rounded-full bg-[#D1FAE5] text-[#065F46]">
+                                        <%- include('partials/icon', { name: 'shield-check', size: 10 }) %> Verified
+                                    </span>
+                                <% } %>
+                            </div>
+                            <div class="text-[13px] text-[#6B7280] mt-0.5"><%= b.address %>, <%= b.city %></div>
+                            <div class="text-[12px] text-[#6B7280] mt-2 inline-flex items-center gap-3 flex-wrap">
+                                <span class="inline-flex items-center gap-1">
+                                    <span class="h-1.5 w-1.5 rounded-full bg-[#10B981]"></span> <%= b.openHours %>
+                                </span>
+                                <% if (b.phone) { %>
+                                    <span>·</span><span><%- include('partials/icon', { name: 'phone', size: 12 }) %> <%= b.phone %></span>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-[11px] uppercase tracking-[0.12em] text-[#9CA3AF] font-semibold">Total units</div>
+                        <div class="font-bold text-ink tabular-nums" style="font-size:28px;letter-spacing:-0.02em;line-height:1;"><%= b.totalUnits %></div>
+                    </div>
+                </div>
+
+                <!-- inventory grid -->
+                <div class="mt-5 pt-5 border-t border-[#E5E7EB] grid grid-cols-4 md:grid-cols-8 gap-2">
+                    <% ['A+','A-','B+','B-','AB+','AB-','O+','O-'].forEach(function(g){ var u = b.inventory[g] || 0; %>
+                        <div class="text-center">
+                            <%- include('partials/bloodBadge', { group: g, size: 'sm', variant: u > 0 ? 'solid' : 'ghost' }) %>
+                            <div class="mt-1.5 text-[12px] font-semibold <%= u > 0 ? 'text-ink' : 'text-[#9CA3AF]' %> tabular-nums">
+                                <%= u %> <span class="text-[10px] font-normal text-[#9CA3AF]">units</span>
+                            </div>
+                        </div>
+                    <% }); %>
+                </div>
+            </div>
+        <% }); } %>
+    </div>
+</section>

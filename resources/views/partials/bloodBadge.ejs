@@ -1,0 +1,16 @@
+<%
+    /* group: 'A+', size: 'sm'|'md'|'lg'|'xl', variant: 'solid'|'outline'|'ghost' */
+    var bg = (typeof variant !== 'undefined') ? variant : 'solid';
+    var bs = (typeof size !== 'undefined') ? size : 'md';
+    var sizes = {
+        sm: 'text-[11px] px-2 py-[3px] min-w-[34px]',
+        md: 'text-[13px] px-2.5 py-1 min-w-[44px]',
+        lg: 'text-[15px] px-3 py-1.5 min-w-[56px]',
+        xl: 'text-[28px] px-5 py-2 min-w-[88px]',
+    };
+    var styleStr = "";
+    if (bg === 'outline') styleStr = 'color:#C8232C;border:1.5px solid #C8232C;background:white;';
+    else if (bg === 'ghost') styleStr = 'color:#C8232C;background:#FCE9EA;';
+    else styleStr = 'color:white;background:#C8232C;';
+%>
+<span class="inline-flex items-center justify-center rounded-full font-bold tracking-tight tabular-nums <%= sizes[bs] %>" style="<%= styleStr %>"><%= group %></span>

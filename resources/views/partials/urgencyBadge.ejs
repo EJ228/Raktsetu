@@ -1,0 +1,11 @@
+<%
+    var cfg = {
+        normal:   { label: 'Normal',   bg: '#F3F4F6', fg: '#4B5563', dot: '#9CA3AF' },
+        urgent:   { label: 'Urgent',   bg: '#FEF3C7', fg: '#92400E', dot: '#F59E0B' },
+        critical: { label: 'Critical', bg: '#FEE2E2', fg: '#991B1B', dot: '#DC2626' },
+    }[level] || { label: level, bg: '#F3F4F6', fg: '#4B5563', dot: '#9CA3AF' };
+%>
+<span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[12px] font-semibold" style="background:<%= cfg.bg %>;color:<%= cfg.fg %>;">
+    <span class="h-1.5 w-1.5 rounded-full <%= level === 'critical' ? 'rs-pulse' : '' %>" style="background:<%= cfg.dot %>;color:<%= cfg.dot %>;"></span>
+    <%= cfg.label %>
+</span>

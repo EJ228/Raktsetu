@@ -1,0 +1,84 @@
+<%- include('../partials/appShellStart', { active: 'pledges', shellTitle: 'Donor pledges', shellSubtitle: 'GMC Blood Bank · Donor network' }) %>
+
+<div class="bg-white rounded-[14px] border border-[#E5E7EB] p-6">
+    <div class="flex items-end justify-between mb-5">
+        <div>
+            <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">Pledges queue</span>
+            <h2 class="mt-1 font-semibold text-ink tracking-tight" style="font-size:18px;">Donors who've offered to donate</h2>
+        </div>
+        <span class="text-[11px] text-[#9CA3AF] inline-flex items-center gap-1.5">
+            <span class="rs-pulse h-1.5 w-1.5 rounded-full" style="background:#10B981;color:#10B981;"></span>
+            Live · auto-updating
+        </span>
+    </div>
+
+    <% if (pledges.length === 0) { %>
+        <div class="py-16 text-center">
+            <div class="mx-auto h-14 w-14 rounded-full bg-[#FAFAFA] grid place-items-center text-[#6B7280] mb-3">
+                <%- include('../partials/icon', { name: 'users', size: 22 }) %>
+            </div>
+            <h3 class="font-semibold text-ink text-[18px]">No pledges yet</h3>
+            <p class="text-[13px] text-[#6B7280] mt-1">When donors respond to open requests, you'll see them here.</p>
+        </div>
+    <% } else { %>
+        <div class="grid gap-3">
+            <% pledges.forEach(function(p){ %>
+                <div class="rounded-[14px] border border-[#E5E7EB] p-5 hover:border-ink/25">
+                    <div class="flex flex-wrap items-start gap-4">
+                        <%- include('../partials/avatar', { name: p.donorId.name, size: 48 }) %>
+
+                        <div class="flex-1 min-w-[260px]">
+                            <div class="flex items-center gap-2 flex-wrap mb-1">
+                                <h3 class="font-semibold text-ink text-[15px]"><%= p.donorId.name %></h3>
+                                <% if (p.donorId.bloodGroup) { %><%- include('../partials/bloodBadge', { group: p.donorId.bloodGroup, size: 'sm' }) %><% } %>
+                                <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize" style="background:#F3F4F6;color:#4B5563;">
+                                    <span class="h-1.5 w-1.5 rounded-full bg-[#9CA3AF]"></span> <%= p.state %>
+                                </span>
+                            </div>
+                            <div class="grid md:grid-cols-2 gap-x-6 gap-y-1.5 text-[12.5px] text-[#6B7280]">
+                                <div class="flex items-center gap-1.5">
+                                    <%- include('../partials/icon', { name: 'map-pin', size: 12 }) %>
+                                    <%= p.donorId.city || '—' %>
+                                </div>
+                                <div class="flex items-center gap-1.5">
+                                    <%- include('../partials/icon', { name: 'phone', size: 12 }) %>
+                                    <%= p.donorId.phone || '—' %>
+                                </div>
+                                <div class="flex items-center gap-1.5">
+                                    <%- include('../partials/icon', { name: 'calendar', size: 12 }) %>
+                                    Pledged <%= moment(p.createdAt).fromNow() %>
+                                </div>
+                                <% if (p.requestId) { %>
+                                    <div class="flex items-center gap-1.5">
+                                        <%- include('../partials/icon', { name: 'heart', size: 12 }) %>
+                                        Request: <%= p.requestId.unitsNeeded %>u of <%= p.requestId.bloodGroup %> for <%= p.requestId.patientName %>
+                                    </div>
+                                <% } %>
+                            </div>
+                        </div>
+
+                        <!-- Action -->
+                        <form action="/bank/pledges/update" method="POST" class="shrink-0 flex flex-wrap items-end gap-2">
+                            <input type="hidden" name="pledgeId" value="<%= p._id %>" />
+                            <label class="flex flex-col gap-1">
+                                <span class="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9CA3AF]">State</span>
+                                <select name="state" class="h-10 px-3 rounded-[10px] border border-[#E5E7EB] outline-none text-[13px] bg-white">
+                                    <% ['waiting','confirmed','scheduled','completed','declined'].forEach(function(s){ %>
+                                        <option value="<%= s %>" <%= p.state === s ? 'selected' : '' %>><%= s.charAt(0).toUpperCase() + s.slice(1) %></option>
+                                    <% }); %>
+                                </select>
+                            </label>
+                            <label class="flex flex-col gap-1">
+                                <span class="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9CA3AF]">Scheduled</span>
+                                <input type="datetime-local" name="scheduledFor" value="<%= p.scheduledFor ? new Date(p.scheduledFor).toISOString().slice(0, 16) : '' %>" class="h-10 px-3 rounded-[10px] border border-[#E5E7EB] outline-none text-[13px]" />
+                            </label>
+                            <button type="submit" class="rs-btn-primary h-10 px-4 rounded-[10px] font-semibold text-[13px]">Save</button>
+                        </form>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+    <% } %>
+</div>
+
+<%- include('../partials/appShellEnd') %>

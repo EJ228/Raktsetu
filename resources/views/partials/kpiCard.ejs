@@ -1,0 +1,23 @@
+<%
+    var tones = {
+        default: { iconBg: '#FAFAFA', iconFg: '#1A1A1A' },
+        danger:  { iconBg: '#FEE2E2', iconFg: '#DC2626' },
+        warning: { iconBg: '#FEF3C7', iconFg: '#92400E' },
+        success: { iconBg: '#D1FAE5', iconFg: '#065F46' },
+        info:    { iconBg: '#DBEAFE', iconFg: '#1E40AF' },
+    };
+    var t = tones[(typeof tone !== 'undefined') ? tone : 'default'];
+    var sub = (typeof subLabel !== 'undefined') ? subLabel : '';
+%>
+<div class="bg-white rounded-[14px] border border-[#E5E7EB] p-5" style="box-shadow: 0 1px 2px rgba(16,24,40,0.04);">
+    <div class="flex items-start justify-between mb-4">
+        <span class="h-9 w-9 rounded-[10px] grid place-items-center" style="background:<%= t.iconBg %>;color:<%= t.iconFg %>;">
+            <%- include('icon', { name: icon, size: 16 }) %>
+        </span>
+    </div>
+    <div class="font-bold text-ink tracking-tight tabular-nums" style="font-size:30px;letter-spacing:-0.025em;line-height:1;">
+        <%= value %>
+    </div>
+    <div class="mt-2 text-[13px] text-muted"><%= label %></div>
+    <% if (sub) { %><div class="mt-1 text-[11px] text-[#9CA3AF]"><%= sub %></div><% } %>
+</div>

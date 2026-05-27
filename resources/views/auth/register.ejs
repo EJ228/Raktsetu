@@ -1,0 +1,163 @@
+<div class="min-h-screen bg-white">
+    <header class="h-16 px-5 md:px-8 border-b border-[#E5E7EB] flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <%- include('../partials/logo') %>
+        </div>
+        <span class="text-[13px] text-[#6B7280]">Already have an account? <a href="/login" class="font-semibold text-ink hover:underline">Sign in</a></span>
+    </header>
+
+    <!-- Step indicator -->
+    <div class="max-w-[920px] mx-auto px-5 md:px-8 pt-8">
+        <div class="flex items-center gap-6 text-[13px]">
+            <% ['Role', 'About you', 'Blood profile', 'Confirm'].forEach(function(label, idx) { %>
+                <div class="flex items-center gap-2 <%= idx === 0 ? 'text-ink font-semibold' : 'text-[#9CA3AF]' %>">
+                    <span class="h-6 w-6 rounded-full text-[11px] font-bold grid place-items-center <%= idx === 0 ? 'bg-[#C8232C] text-white' : 'bg-[#F3F4F6] text-[#9CA3AF]' %>"><%= idx + 1 %></span>
+                    <span class="hidden md:inline"><%= label %></span>
+                </div>
+                <% if (idx < 3) { %><div class="flex-1 h-px bg-[#E5E7EB]"></div><% } %>
+            <% }); %>
+        </div>
+    </div>
+
+    <div class="max-w-[920px] mx-auto px-5 md:px-8 py-10 md:py-14">
+        <h1 class="font-bold text-ink tracking-tight" style="font-size:clamp(28px,3.5vw,36px);letter-spacing:-0.025em;line-height:1.1;">
+            Welcome to RaktSetu.<br/>How will you use it?
+        </h1>
+        <p class="mt-3 text-[15px] text-[#6B7280]">Choose the role that fits you best. You can always add another role later from your account settings.</p>
+
+        <form action="/register" method="POST" class="mt-8 flex flex-col gap-6">
+
+            <!-- ROLE CARDS -->
+            <div class="grid md:grid-cols-3 gap-4">
+                <% [
+                    { id: 'donor',      icon: 'droplet',  title: "I'm a Donor",       sub: 'Get notified about urgent requests near you. Donate when you\'re eligible. Track your impact.', badge: 'Most common' },
+                    { id: 'requester',  icon: 'heart',    title: 'I need Blood',       sub: 'Post a request for yourself or a loved one. Get matched with donors and accredited blood banks.', badge: '' },
+                    { id: 'bank_admin', icon: 'building', title: "I'm a Blood Bank",   sub: 'Manage your inventory, accept requests, and coordinate with pledged donors — all in one place.', badge: 'For verified institutions' },
+                ].forEach(function(r){ var checked = (selectedRole === r.id) || (!selectedRole && r.id === 'donor'); %>
+                    <label data-role-card="<%= r.id %>" class="cursor-pointer rounded-[14px] border-2 p-5 transition-colors flex flex-col" style="border-color:<%= checked ? '#C8232C' : '#E5E7EB' %>;background:<%= checked ? '#FFFBFB' : 'white' %>;">
+                        <input type="radio" name="role" value="<%= r.id %>" <%= checked ? 'checked' : '' %> class="hidden" />
+                        <div class="flex items-start justify-between mb-4">
+                            <span class="h-11 w-11 rounded-[10px] bg-[#FCE9EA] grid place-items-center text-[#C8232C]">
+                                <%- include('../partials/icon', { name: r.icon, size: 18 }) %>
+                            </span>
+                            <% if (r.badge) { %>
+                                <span class="text-[10px] font-bold uppercase tracking-[0.08em] text-[#C8232C]"><%= r.badge %></span>
+                            <% } %>
+                        </div>
+                        <h3 class="font-semibold text-ink text-[16px] mb-2"><%= r.title %></h3>
+                        <p class="text-[12.5px] text-[#6B7280] leading-[1.55] flex-1"><%= r.sub %></p>
+                        <div class="mt-4 text-[12.5px] font-semibold <%= checked ? 'text-[#C8232C]' : 'text-[#6B7280]' %>">
+                            <%= checked ? '✓ Selected' : 'Choose this role →' %>
+                        </div>
+                    </label>
+                <% }); %>
+            </div>
+
+            <!-- COMMON FIELDS -->
+            <div class="bg-white rounded-[14px] border border-[#E5E7EB] p-5 md:p-6">
+                <h3 class="font-semibold text-ink text-[16px]">About you</h3>
+                <div class="mt-4 grid md:grid-cols-2 gap-4">
+                    <label class="flex flex-col gap-1.5">
+                        <span class="text-[13px] font-medium text-ink">Full name <span class="text-[#C8232C]">*</span></span>
+                        <input name="name" required placeholder="Anushka Bhattacharya" value="<%= messages.name || '' %>" class="h-11 px-3.5 rounded-[10px] border border-[#E5E7EB] outline-none text-[14px]" />
+                    </label>
+                    <label class="flex flex-col gap-1.5">
+                        <span class="text-[13px] font-medium text-ink">Email <span class="text-[#C8232C]">*</span></span>
+                        <input name="email" type="email" required placeholder="you@email.com" value="<%= messages.email || '' %>" class="h-11 px-3.5 rounded-[10px] border border-[#E5E7EB] outline-none text-[14px]" />
+                    </label>
+                    <label class="flex flex-col gap-1.5">
+                        <span class="text-[13px] font-medium text-ink">Password <span class="text-[#C8232C]">*</span></span>
+                        <input name="password" type="password" required placeholder="At least 6 characters" class="h-11 px-3.5 rounded-[10px] border border-[#E5E7EB] outline-none text-[14px]" />
+                    </label>
+                    <label class="flex flex-col gap-1.5">
+                        <span class="text-[13px] font-medium text-ink">Phone</span>
+                        <input name="phone" type="tel" placeholder="+91 98765 43210" class="h-11 px-3.5 rounded-[10px] border border-[#E5E7EB] outline-none text-[14px]" />
+                    </label>
+                </div>
+            </div>
+
+            <!-- DONOR PANE -->
+            <div data-role-pane="donor" class="bg-white rounded-[14px] border border-[#E5E7EB] p-5 md:p-6">
+                <h3 class="font-semibold text-ink text-[16px]">Blood profile</h3>
+                <p class="text-[12.5px] text-[#6B7280] mt-1">Used to match you with compatible requests nearby.</p>
+                <div class="mt-4 grid md:grid-cols-2 gap-4">
+                    <label class="flex flex-col gap-1.5">
+                        <span class="text-[13px] font-medium text-ink">Blood group</span>
+                        <select name="bloodGroup" class="h-11 px-3.5 rounded-[10px] border border-[#E5E7EB] outline-none text-[14px]">
+                            <option value="">Select group</option>
+                            <% ['A+','A-','B+','B-','AB+','AB-','O+','O-'].forEach(function(g){ %><option value="<%= g %>"><%= g %></option><% }); %>
+                        </select>
+                    </label>
+                    <label class="flex flex-col gap-1.5">
+                        <span class="text-[13px] font-medium text-ink">Date of birth</span>
+                        <input name="dob" type="date" class="h-11 px-3.5 rounded-[10px] border border-[#E5E7EB] outline-none text-[14px]" />
+                    </label>
+                    <label class="flex flex-col gap-1.5">
+                        <span class="text-[13px] font-medium text-ink">Gender</span>
+                        <select name="gender" class="h-11 px-3.5 rounded-[10px] border border-[#E5E7EB] outline-none text-[14px]">
+                            <option value="">Select</option><option value="male">Male</option><option value="female">Female</option><option value="other">Other</option>
+                        </select>
+                    </label>
+                    <label class="flex flex-col gap-1.5">
+                        <span class="text-[13px] font-medium text-ink">Weight (kg)</span>
+                        <input name="weight" type="number" min="40" max="150" placeholder="60" class="h-11 px-3.5 rounded-[10px] border border-[#E5E7EB] outline-none text-[14px]" />
+                    </label>
+                    <label class="flex flex-col gap-1.5 md:col-span-2">
+                        <span class="text-[13px] font-medium text-ink">City</span>
+                        <input name="city" placeholder="Guwahati" class="h-11 px-3.5 rounded-[10px] border border-[#E5E7EB] outline-none text-[14px]" />
+                    </label>
+                </div>
+            </div>
+
+            <!-- REQUESTER PANE -->
+            <div data-role-pane="requester" class="bg-white rounded-[14px] border border-[#E5E7EB] p-5 md:p-6 hidden">
+                <h3 class="font-semibold text-ink text-[16px]">Where are you based?</h3>
+                <p class="text-[12.5px] text-[#6B7280] mt-1">We'll show you nearby blood banks when you create requests.</p>
+                <div class="mt-4">
+                    <label class="flex flex-col gap-1.5">
+                        <span class="text-[13px] font-medium text-ink">City</span>
+                        <input name="city" placeholder="Guwahati" class="h-11 px-3.5 rounded-[10px] border border-[#E5E7EB] outline-none text-[14px]" />
+                    </label>
+                </div>
+            </div>
+
+            <!-- BANK PANE -->
+            <div data-role-pane="bank_admin" class="bg-white rounded-[14px] border border-[#E5E7EB] p-5 md:p-6 hidden">
+                <h3 class="font-semibold text-ink text-[16px]">Blood bank details</h3>
+                <p class="text-[12.5px] text-[#6B7280] mt-1">We verify each bank manually. You can sign in to set up inventory while we review.</p>
+                <div class="mt-4 grid md:grid-cols-2 gap-4">
+                    <label class="flex flex-col gap-1.5">
+                        <span class="text-[13px] font-medium text-ink">Blood bank name</span>
+                        <input name="bankName" placeholder="GMC Blood Bank" class="h-11 px-3.5 rounded-[10px] border border-[#E5E7EB] outline-none text-[14px]" />
+                    </label>
+                    <label class="flex flex-col gap-1.5">
+                        <span class="text-[13px] font-medium text-ink">License number</span>
+                        <input name="licenseNumber" placeholder="ABL-GH-001" class="h-11 px-3.5 rounded-[10px] border border-[#E5E7EB] outline-none text-[14px]" />
+                    </label>
+                    <label class="flex flex-col gap-1.5 md:col-span-2">
+                        <span class="text-[13px] font-medium text-ink">Address</span>
+                        <input name="address" placeholder="Old GMCH Road, Bhangagarh" class="h-11 px-3.5 rounded-[10px] border border-[#E5E7EB] outline-none text-[14px]" />
+                    </label>
+                    <label class="flex flex-col gap-1.5">
+                        <span class="text-[13px] font-medium text-ink">City</span>
+                        <input name="bankCity" placeholder="Guwahati" class="h-11 px-3.5 rounded-[10px] border border-[#E5E7EB] outline-none text-[14px]" />
+                    </label>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-2">
+                <a href="/" class="inline-flex items-center gap-1.5 text-[13px] text-[#6B7280] hover:text-ink">
+                    <%- include('../partials/icon', { name: 'arrow-left', size: 14 }) %>
+                    Back
+                </a>
+                <div class="flex items-center gap-4">
+                    <span class="text-[13px] text-[#9CA3AF] hidden md:inline">Step 1 of 4</span>
+                    <button type="submit" class="rs-btn-primary h-[52px] px-7 rounded-[10px] font-semibold text-[15px] inline-flex items-center gap-2">
+                        Continue
+                        <%- include('../partials/icon', { name: 'arrow-right', size: 18 }) %>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

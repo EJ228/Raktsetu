@@ -1,0 +1,213 @@
+<%- include('../partials/appShellStart', { active: 'profile', shellTitle: 'Profile & settings', shellSubtitle: 'Account' }) %>
+
+<!-- Profile header -->
+<div class="flex flex-col md:flex-row items-start md:items-center gap-6 mb-8">
+    <div class="flex items-center gap-5 flex-1">
+        <%- include('../partials/avatar', { name: user.name, size: 72 }) %>
+        <div>
+            <div class="flex items-center gap-2">
+                <h2 class="font-bold text-ink tracking-tight" style="font-size:22px;letter-spacing:-0.02em;"><%= user.name %></h2>
+                <span class="inline-flex items-center gap-1 bg-[#D1FAE5] text-[#065F46] text-[11px] font-semibold px-2 py-0.5 rounded-full">
+                    <%- include('../partials/icon', { name: 'check-circle', size: 11 }) %> Verified
+                </span>
+            </div>
+            <div class="flex items-center gap-3 flex-wrap text-[12.5px] text-[#6B7280] mt-1">
+                <span class="inline-flex items-center gap-1"><%- include('../partials/icon', { name: 'map-pin', size: 12 }) %> <%= user.city || 'Not set' %></span>
+                <span>·</span>
+                <span class="inline-flex items-center gap-1"><%- include('../partials/icon', { name: 'calendar', size: 12 }) %> Donor since <%= moment(user.createdAt).format('MMM YYYY') %></span>
+            </div>
+            <div class="flex items-center gap-2 mt-3">
+                <a href="#" class="h-9 px-3.5 rounded-[8px] border border-[#E5E7EB] text-ink font-semibold text-[12.5px] inline-flex items-center gap-1.5 hover:bg-[#FAFAFA]">
+                    <%- include('../partials/icon', { name: 'edit', size: 12 }) %> Edit profile
+                </a>
+            </div>
+        </div>
+    </div>
+    <% if (user.bloodGroup) { %>
+        <div class="bg-[#C8232C] text-white rounded-[14px] px-5 py-4 text-center shrink-0">
+            <div class="text-[10px] font-bold uppercase tracking-[0.1em] text-white/80">Blood group</div>
+            <div class="text-[36px] font-bold leading-none mt-1"><%= user.bloodGroup %></div>
+            <div class="text-[11px] text-white/70 mt-1">
+                <%= user.bloodGroup === 'O-' ? 'Universal donor' : user.bloodGroup === 'AB+' ? 'Universal recipient' : user.bloodGroup.includes('+') ? 'Rh+ donor' : 'Rh− donor' %>
+            </div>
+        </div>
+    <% } %>
+</div>
+
+<!-- Tabs -->
+<div class="flex items-center gap-6 border-b border-[#E5E7EB] mb-6" data-tab-set>
+    <% ['Personal', 'Medical', 'Availability'].forEach(function(tab, idx) { %>
+        <button data-tab="<%= tab.toLowerCase() %>" class="pb-3 text-[13.5px] font-semibold border-b-2 transition-colors <%= idx === 0 ? 'text-ink border-ink' : 'text-[#6B7280] border-transparent hover:text-ink' %>">
+            <%= tab %>
+        </button>
+    <% }); %>
+</div>
+
+<form action="/donor/profile" method="POST">
+    <div class="grid md:grid-cols-12 gap-6">
+        <section class="md:col-span-8">
+            <!-- Personal tab -->
+            <div data-tab-pane="personal" class="grid gap-5">
+                <div class="bg-white rounded-[14px] border border-[#E5E7EB] p-6">
+                    <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">Identity</span>
+                    <h3 class="font-semibold text-ink text-[17px] mt-1 tracking-tight">Basic information</h3>
+                    <div class="mt-5 grid md:grid-cols-2 gap-4">
+                        <label class="flex flex-col gap-1.5">
+                            <span class="text-[12.5px] font-medium text-[#6B7280]">Full name</span>
+                            <div class="flex items-center gap-2.5 h-11 px-3.5 rounded-[10px] border border-[#E5E7EB] bg-[#FAFAFA]">
+                                <%- include('../partials/icon', { name: 'user', size: 14, className: 'text-[#9CA3AF]' }) %>
+                                <input name="name" value="<%= user.name %>" class="flex-1 bg-transparent text-[14px] outline-none text-ink" />
+                            </div>
+                        </label>
+                        <label class="flex flex-col gap-1.5">
+                            <span class="text-[12.5px] font-medium text-[#6B7280]">Email</span>
+                            <div class="flex items-center gap-2.5 h-11 px-3.5 rounded-[10px] border border-[#E5E7EB] bg-[#FAFAFA]">
+                                <%- include('../partials/icon', { name: 'mail', size: 14, className: 'text-[#9CA3AF]' }) %>
+                                <input value="<%= user.email %>" disabled class="flex-1 bg-transparent text-[14px] outline-none text-[#6B7280]" />
+                            </div>
+                        </label>
+                        <label class="flex flex-col gap-1.5">
+                            <span class="text-[12.5px] font-medium text-[#6B7280]">Phone (verified)</span>
+                            <div class="flex items-center gap-2.5 h-11 px-3.5 rounded-[10px] border border-[#E5E7EB] bg-[#FAFAFA]">
+                                <%- include('../partials/icon', { name: 'phone', size: 14, className: 'text-[#9CA3AF]' }) %>
+                                <input name="phone" value="<%= user.phone || '' %>" class="flex-1 bg-transparent text-[14px] outline-none text-ink" />
+                            </div>
+                        </label>
+                        <label class="flex flex-col gap-1.5">
+                            <span class="text-[12.5px] font-medium text-[#6B7280]">Date of birth</span>
+                            <div class="flex items-center gap-2.5 h-11 px-3.5 rounded-[10px] border border-[#E5E7EB] bg-[#FAFAFA]">
+                                <%- include('../partials/icon', { name: 'calendar', size: 14, className: 'text-[#9CA3AF]' }) %>
+                                <input name="dob" type="date" value="<%= user.dob ? new Date(user.dob).toISOString().slice(0,10) : '' %>" class="flex-1 bg-transparent text-[14px] outline-none text-ink" />
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-[14px] border border-[#E5E7EB] p-6">
+                    <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">Address</span>
+                    <h3 class="font-semibold text-ink text-[17px] mt-1 tracking-tight">Where to reach you</h3>
+                    <div class="mt-5 grid md:grid-cols-2 gap-4">
+                        <label class="flex flex-col gap-1.5 md:col-span-2">
+                            <span class="text-[12.5px] font-medium text-[#6B7280]">City</span>
+                            <div class="flex items-center gap-2.5 h-11 px-3.5 rounded-[10px] border border-[#E5E7EB] bg-[#FAFAFA]">
+                                <%- include('../partials/icon', { name: 'map-pin', size: 14, className: 'text-[#9CA3AF]' }) %>
+                                <input name="city" value="<%= user.city || '' %>" class="flex-1 bg-transparent text-[14px] outline-none text-ink" />
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Medical tab (hidden) -->
+            <div data-tab-pane="medical" class="grid gap-5 hidden">
+                <div class="bg-white rounded-[14px] border border-[#E5E7EB] p-6">
+                    <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">Blood</span>
+                    <h3 class="font-semibold text-ink text-[17px] mt-1 tracking-tight">Medical details</h3>
+                    <div class="mt-5 grid md:grid-cols-2 gap-4">
+                        <label class="flex flex-col gap-1.5"><span class="text-[12.5px] font-medium text-[#6B7280]">Blood group</span>
+                            <select name="bloodGroup" class="h-11 px-3.5 rounded-[10px] border border-[#E5E7EB] outline-none text-[14px] bg-[#FAFAFA]">
+                                <option value="">—</option>
+                                <% ['A+','A-','B+','B-','AB+','AB-','O+','O-'].forEach(function(g){ %>
+                                    <option value="<%= g %>" <%= user.bloodGroup === g ? 'selected' : '' %>><%= g %></option>
+                                <% }); %>
+                            </select>
+                        </label>
+                        <label class="flex flex-col gap-1.5"><span class="text-[12.5px] font-medium text-[#6B7280]">Weight (kg)</span>
+                            <input name="weight" type="number" value="<%= user.weight || '' %>" class="h-11 px-3.5 rounded-[10px] border border-[#E5E7EB] outline-none text-[14px] bg-[#FAFAFA]" />
+                        </label>
+                        <label class="flex flex-col gap-1.5"><span class="text-[12.5px] font-medium text-[#6B7280]">Gender</span>
+                            <select name="gender" class="h-11 px-3.5 rounded-[10px] border border-[#E5E7EB] outline-none text-[14px] bg-[#FAFAFA]">
+                                <option value="">—</option>
+                                <% ['male','female','other'].forEach(function(o){ %><option value="<%= o %>" <%= user.gender === o ? 'selected' : '' %>><%= o[0].toUpperCase()+o.slice(1) %></option><% }); %>
+                            </select>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Availability tab (hidden) -->
+            <div data-tab-pane="availability" class="grid gap-5 hidden">
+                <div class="bg-white rounded-[14px] border border-[#E5E7EB] p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="font-semibold text-ink text-[16px]">Available for emergency calls</h3>
+                            <p class="text-[12.5px] text-[#6B7280] mt-1">When on, we'll alert you for compatible critical requests within your city.</p>
+                        </div>
+                        <label class="inline-flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" name="available" <%= user.available ? 'checked' : '' %> class="sr-only peer" />
+                            <span class="relative inline-block w-11 h-6 bg-[#E5E7EB] rounded-full peer-checked:bg-ink transition-colors">
+                                <span class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white transition-transform peer-checked:translate-x-5" style="box-shadow:0 1px 2px rgba(0,0,0,0.18);"></span>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 mt-5">
+                <a href="/donor/dashboard" class="h-11 px-5 rounded-[10px] border border-[#E5E7EB] text-ink font-semibold text-[14px] inline-flex items-center hover:bg-[#FAFAFA]">Cancel</a>
+                <button type="submit" class="rs-btn-primary h-11 px-6 rounded-[10px] font-semibold text-[14px] inline-flex items-center gap-2">Save changes</button>
+            </div>
+        </section>
+
+        <!-- Sidebar -->
+        <aside class="md:col-span-4 flex flex-col gap-6">
+            <!-- Digital donor card -->
+            <div class="bg-white rounded-[14px] border border-[#E5E7EB] p-5">
+                <div class="flex items-start justify-between mb-3">
+                    <div>
+                        <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">Digital donor card</span>
+                        <h3 class="font-semibold text-ink text-[16px] mt-0.5">Carry this with you</h3>
+                    </div>
+                    <button class="text-[12px] font-semibold text-ink inline-flex items-center gap-1 hover:underline">→ Download PDF</button>
+                </div>
+                <!-- Card preview -->
+                <div class="rounded-[12px] overflow-hidden" style="background:linear-gradient(135deg, #1A1A2E 0%, #16213E 100%);">
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-1.5">
+                                <div class="h-5 w-5 rounded-full bg-[#C8232C] grid place-items-center">
+                                    <%- include('../partials/icon', { name: 'droplet', size: 10, className: 'text-white' }) %>
+                                </div>
+                                <span class="text-[10px] font-bold text-white/90">RaktSetu</span>
+                            </div>
+                            <span class="text-[9px] font-semibold text-white/50 uppercase">Donor Card · V1</span>
+                        </div>
+                        <div class="text-[10px] text-white/50 uppercase mb-0.5">Name</div>
+                        <div class="text-[14px] font-bold text-white"><%= user.name %></div>
+                        <div class="grid grid-cols-3 gap-3 mt-3">
+                            <div>
+                                <div class="text-[9px] text-white/50 uppercase">Group</div>
+                                <div class="text-[14px] font-bold text-[#C8232C]"><%= user.bloodGroup || '—' %></div>
+                            </div>
+                            <div>
+                                <div class="text-[9px] text-white/50 uppercase">ID</div>
+                                <div class="text-[11px] font-mono text-white/80">RKT-<%= user._id.toString().slice(-6).toUpperCase() %></div>
+                            </div>
+                            <div>
+                                <div class="text-[9px] text-white/50 uppercase">Since</div>
+                                <div class="text-[11px] text-white/80"><%= moment(user.createdAt).format('MMM YYYY') %></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-[11px] text-[#6B7280] mt-3 leading-[1.5]">Show this card at any partner blood bank to verify identity. Refreshes automatically every 30 days.</p>
+            </div>
+
+            <!-- Danger zone -->
+            <div class="bg-white rounded-[14px] border border-[#E5E7EB] p-5">
+                <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#C8232C]">Danger zone</span>
+                <h3 class="font-semibold text-ink text-[16px] mt-0.5">Account actions</h3>
+                <div class="mt-4 flex flex-col gap-2">
+                    <button type="button" class="h-10 px-4 rounded-[8px] border border-[#E5E7EB] text-[#6B7280] font-semibold text-[13px] inline-flex items-center gap-2 hover:bg-[#FAFAFA] w-full justify-center" disabled>
+                        <%- include('../partials/icon', { name: 'pause-circle', size: 14 }) %> Pause notifications
+                    </button>
+                    <button type="button" class="h-10 px-4 rounded-[8px] border border-[#FCA5A5] text-[#C8232C] font-semibold text-[13px] inline-flex items-center gap-2 hover:bg-[#FEF2F2] w-full justify-center" disabled>
+                        <%- include('../partials/icon', { name: 'trash', size: 14 }) %> Delete account
+                    </button>
+                </div>
+            </div>
+        </aside>
+    </div>
+</form>
+
+<%- include('../partials/appShellEnd') %>

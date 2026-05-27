@@ -1,0 +1,36 @@
+<%- include('partials/appShellStart', { active: 'notif', shellTitle: 'Notifications', shellSubtitle: 'All updates' }) %>
+
+<div class="max-w-[820px] mx-auto">
+    <div class="bg-white rounded-[14px] border border-[#E5E7EB] p-6">
+        <div class="flex items-end justify-between mb-5">
+            <div>
+                <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">Today</span>
+                <h2 class="mt-1 font-semibold text-ink tracking-tight" style="font-size:18px;">Your activity</h2>
+            </div>
+            <button class="text-[12px] font-semibold text-[#6B7280] hover:text-ink">Mark all as read</button>
+        </div>
+
+        <%
+            var notifs = [
+                { tone: '#10B981', icon: 'check-circle', when: 'just now',  text: 'Welcome to RaktSetu — your account is ready.' },
+                { tone: '#3B82F6', icon: 'bell',         when: '2 min ago', text: 'You\'ll receive a notification when a compatible request appears nearby.' },
+                { tone: '#7C3AED', icon: 'shield-check', when: '5 min ago', text: 'Your profile and contact details are kept private to verified blood banks only.' },
+            ];
+        %>
+        <ol class="grid gap-3">
+            <% notifs.forEach(function(n){ %>
+                <li class="flex items-start gap-3 p-4 rounded-[10px] border border-[#E5E7EB]">
+                    <span class="h-9 w-9 rounded-full grid place-items-center shrink-0" style="background:<%= n.tone %>1a;color:<%= n.tone %>;">
+                        <%- include('partials/icon', { name: n.icon, size: 14 }) %>
+                    </span>
+                    <div class="flex-1">
+                        <div class="text-[13.5px] text-ink leading-snug"><%= n.text %></div>
+                        <div class="text-[11.5px] text-[#9CA3AF] mt-0.5"><%= n.when %></div>
+                    </div>
+                </li>
+            <% }); %>
+        </ol>
+    </div>
+</div>
+
+<%- include('partials/appShellEnd') %>

@@ -1,0 +1,22 @@
+<header class="border-b border-[#E5E7EB] bg-white/90 backdrop-blur sticky top-0 z-30">
+    <div class="max-w-[1200px] mx-auto px-5 md:px-8 h-[68px] flex items-center justify-between">
+        <%- include('logo') %>
+        <nav class="hidden md:flex items-center gap-1">
+            <a href="/" class="px-3.5 py-2 text-[14px] font-medium text-[#1A1A1A]/80 hover:text-ink rounded-md hover:bg-[#FAFAFA]">How it works</a>
+            <a href="/search" class="px-3.5 py-2 text-[14px] font-medium text-[#1A1A1A]/80 hover:text-ink rounded-md hover:bg-[#FAFAFA]">Find blood</a>
+            <a href="/register?role=donor" class="px-3.5 py-2 text-[14px] font-medium text-[#1A1A1A]/80 hover:text-ink rounded-md hover:bg-[#FAFAFA]">Become a donor</a>
+            <a href="/register?role=bank_admin" class="px-3.5 py-2 text-[14px] font-medium text-[#1A1A1A]/80 hover:text-ink rounded-md hover:bg-[#FAFAFA]">For blood banks</a>
+        </nav>
+        <div class="flex items-center gap-2">
+            <% if (typeof user !== 'undefined' && user) { %>
+                <a href="<%= user.role === 'donor' ? '/donor/dashboard' : user.role === 'requester' ? '/requester/my' : '/bank/dashboard' %>"
+                   class="h-9 px-4 inline-flex items-center rounded-[10px] bg-ink text-white font-semibold text-[13px]">
+                    Dashboard
+                </a>
+            <% } else { %>
+                <a href="/login" class="h-9 px-3.5 inline-flex items-center rounded-[10px] text-[13px] font-semibold text-ink hover:bg-[#FAFAFA]">Log in</a>
+                <a href="/register" class="h-9 px-4 inline-flex items-center rounded-[10px] bg-ink text-white font-semibold text-[13px] hover:bg-black">Register</a>
+            <% } %>
+        </div>
+    </div>
+</header>

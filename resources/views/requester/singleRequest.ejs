@@ -1,0 +1,190 @@
+<%- include('../partials/appShellStart', { active: 'my', shellTitle: r.unitsNeeded + ' units of ' + r.bloodGroup + ' for ' + r.patientName, shellSubtitle: 'Request · #RS-' + String(r._id).slice(-5).toUpperCase() + ' · posted ' + moment(r.createdAt).fromNow() }) %>
+
+<div class="grid gap-6" data-request-id="<%= r._id %>">
+
+    <!-- Status timeline -->
+    <div class="bg-white rounded-[14px] border border-[#E5E7EB] p-6 md:p-7">
+        <div class="flex flex-col md:flex-row md:items-start gap-6">
+            <div class="shrink-0">
+                <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">Progress</span>
+                <div class="mt-2 flex items-baseline gap-3">
+                    <%- include('../partials/bloodBadge', { group: r.bloodGroup, size: 'lg' }) %>
+                    <div>
+                        <div class="font-bold text-ink tracking-tight" style="font-size:24px;letter-spacing:-0.02em;">
+                            <%= r.unitsFulfilled %> of <%= r.unitsNeeded %> units
+                        </div>
+                        <div class="text-[12.5px] text-[#6B7280]">secured · <%= r.unitsNeeded - r.unitsFulfilled %> more needed</div>
+                    </div>
+                </div>
+                <div class="mt-3 flex items-center gap-2" data-request-status>
+                    <%- include('../partials/statusBadge', { status: r.status }) %>
+                    <%- include('../partials/urgencyBadge', { level: r.urgency }) %>
+                </div>
+            </div>
+
+            <!-- Timeline -->
+            <div class="flex-1 pt-1">
+                <%
+                    var statusOrder = ['pending', 'matched', 'assigned', 'fulfilled'];
+                    var currentIdx = statusOrder.indexOf(r.status);
+                    if (r.status === 'cancelled') currentIdx = 0;
+                    var timelineSteps = [
+                        { label: 'Pending',        sub: 'Posted to RaktSetu' },
+                        { label: 'Matched',        sub: 'Donors responding' },
+                        { label: 'Donor Assigned', sub: 'Bank confirms' },
+                        { label: 'Fulfilled',      sub: 'Transfusion done' },
+                    ];
+                %>
+                <ol class="flex items-start">
+                    <% timelineSteps.forEach(function(s, i){
+                        var done = i < currentIdx;
+                        var act  = i === currentIdx;
+                        var lst  = i === timelineSteps.length - 1;
+                        var cls  = done ? 'rs-step-done' : (act ? 'rs-step-active' : 'rs-step-pending');
+                    %>
+                        <li class="flex-1 relative">
+                            <div class="flex items-center">
+                                <span class="<%= cls %> h-8 w-8 rounded-full grid place-items-center text-[12px] font-bold shrink-0 border">
+                                    <% if (done) { %><%- include('../partials/icon', { name: 'check', size: 12, stroke: 3 }) %><% } else { %><%= i + 1 %><% } %>
+                                </span>
+                                <% if (!lst) { %><span class="flex-1 h-px ml-3 mr-3" style="background:<%= done ? '#1A1A1A' : '#E5E7EB' %>;"></span><% } %>
+                            </div>
+                            <div class="mt-3 pr-3">
+                                <div class="text-[13px] font-semibold text-ink"><%= s.label %></div>
+                                <div class="text-[11.5px] text-[#6B7280] mt-0.5"><%= s.sub %></div>
+                            </div>
+                        </li>
+                    <% }); %>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid md:grid-cols-12 gap-6">
+        <div class="md:col-span-8 grid gap-6">
+
+            <!-- Summary -->
+            <div class="bg-white rounded-[14px] border border-[#E5E7EB] p-6">
+                <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">Request · Summary</span>
+                <h2 class="mt-1 mb-4 font-semibold text-ink tracking-tight" style="font-size:18px;">Details</h2>
+                <div class="grid grid-cols-2 gap-x-8 gap-y-4">
+                    <% [
+                        ['Patient', r.patientName + ' · ' + r.patientAge + 'y / ' + r.patientGender],
+                        ['Condition', r.condition || '—'],
+                        ['Component', r.component.replace('_', ' ')],
+                        ['Needed by', moment(r.neededBy).format('DD MMM, h:mm A')],
+                        ['Hospital / bank', r.bloodBankId ? r.bloodBankId.name : '—'],
+                        ['Posted', moment(r.createdAt).fromNow() + ' · #RS-' + String(r._id).slice(-5).toUpperCase()],
+                    ].forEach(function(row){ %>
+                        <div>
+                            <div class="text-[11px] uppercase tracking-[0.12em] font-semibold text-[#9CA3AF]"><%= row[0] %></div>
+                            <div class="text-[13.5px] font-semibold text-ink mt-1 capitalize"><%= row[1] %></div>
+                        </div>
+                    <% }); %>
+                </div>
+            </div>
+
+            <!-- Pledged donors -->
+            <div class="bg-white rounded-[14px] border border-[#E5E7EB] p-6">
+                <div class="flex items-end justify-between mb-4">
+                    <div>
+                        <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">Donors responding · live</span>
+                        <h2 class="mt-1 font-semibold text-ink tracking-tight" style="font-size:18px;"><%= pledges.length %> donor<%= pledges.length === 1 ? '' : 's' %> have pledged</h2>
+                    </div>
+                    <span class="text-[11px] text-[#9CA3AF] inline-flex items-center gap-1.5">
+                        <span class="rs-pulse h-1.5 w-1.5 rounded-full" style="background:#10B981;color:#10B981;"></span>
+                        updates every 10s
+                    </span>
+                </div>
+                <% if (pledges.length === 0) { %>
+                    <p class="text-[13px] text-[#6B7280]">Compatible donors are being notified. You'll see them appear here as they pledge.</p>
+                <% } else { pledges.forEach(function(p){ %>
+                    <div class="flex items-center gap-3 py-3 border-b border-[#E5E7EB] last:border-0">
+                        <%- include('../partials/avatar', { name: p.donorId.name, size: 40 }) %>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2">
+                                <div class="text-[13.5px] font-semibold text-ink truncate"><%= p.donorId.name %></div>
+                                <% if (p.state === 'confirmed') { %>
+                                    <span class="inline-flex items-center gap-1 text-[10.5px] font-semibold px-1.5 py-0.5 rounded-full bg-[#D1FAE5] text-[#065F46]">
+                                        <%- include('../partials/icon', { name: 'check', size: 10, stroke: 3 }) %> Bank confirmed
+                                    </span>
+                                <% } else if (p.state === 'waiting') { %>
+                                    <span class="text-[10.5px] text-[#9CA3AF] font-medium">awaiting confirm</span>
+                                <% } %>
+                            </div>
+                            <div class="text-[11.5px] text-[#6B7280] mt-0.5">pledged <%= moment(p.createdAt).fromNow() %></div>
+                        </div>
+                        <% if (p.donorId.bloodGroup) { %><%- include('../partials/bloodBadge', { group: p.donorId.bloodGroup, size: 'sm' }) %><% } %>
+                    </div>
+                <% }); } %>
+                <p class="mt-4 text-[12px] text-[#6B7280] inline-flex items-center gap-1.5">
+                    <%- include('../partials/icon', { name: 'shield-check', size: 13, className: 'text-[#10B981]' }) %>
+                    Donor identities stay with the bank · you'll only see them after a successful transfusion.
+                </p>
+            </div>
+
+            <!-- Activity feed -->
+            <div class="bg-white rounded-[14px] border border-[#E5E7EB] p-6">
+                <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">Activity</span>
+                <h2 class="mt-1 mb-4 font-semibold text-ink tracking-tight" style="font-size:18px;">What's happening</h2>
+                <ol class="relative">
+                    <% (r.activity || []).slice().reverse().forEach(function(a, i, arr){ %>
+                        <li class="relative pl-9 pb-4 last:pb-0">
+                            <% if (i < arr.length - 1) { %><span class="absolute left-[14px] top-7 bottom-0 w-px bg-[#E5E7EB]"></span><% } %>
+                            <span class="absolute left-0 top-0.5 h-7 w-7 rounded-full grid place-items-center" style="background:<%= a.tone %>1a;color:<%= a.tone %>;">
+                                <%- include('../partials/icon', { name: 'activity', size: 13 }) %>
+                            </span>
+                            <div class="text-[13px] text-ink leading-snug"><%= a.text %></div>
+                            <div class="text-[11.5px] text-[#9CA3AF] mt-0.5"><%= moment(a.when).fromNow() %></div>
+                        </li>
+                    <% }); %>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Right sidebar -->
+        <aside class="md:col-span-4 grid gap-6">
+            <div class="bg-white rounded-[14px] border border-[#E5E7EB] p-6">
+                <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">Coordinating</span>
+                <h2 class="mt-1 mb-3 font-semibold text-ink tracking-tight" style="font-size:18px;"><%= r.bloodBankId.name %></h2>
+                <div class="grid gap-3 text-[13px] text-ink">
+                    <div class="flex items-start gap-3">
+                        <%- include('../partials/icon', { name: 'map-pin', size: 14, className: 'text-[#6B7280] mt-0.5' }) %>
+                        <div><%= r.bloodBankId.address %>, <%= r.bloodBankId.city %></div>
+                    </div>
+                    <% if (r.bloodBankId.phone) { %>
+                        <div class="flex items-start gap-3">
+                            <%- include('../partials/icon', { name: 'phone', size: 14, className: 'text-[#6B7280] mt-0.5' }) %>
+                            <div><%= r.bloodBankId.phone %></div>
+                        </div>
+                    <% } %>
+                    <% if (r.bloodBankId.coordinator) { %>
+                        <div class="flex items-start gap-3">
+                            <%- include('../partials/icon', { name: 'user', size: 14, className: 'text-[#6B7280] mt-0.5' }) %>
+                            <div>Coordinator: <span class="font-semibold"><%= r.bloodBankId.coordinator %></span></div>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <% if (!['fulfilled', 'cancelled'].includes(r.status)) { %>
+                <div class="bg-[#FAFAFA] rounded-[14px] p-5">
+                    <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">Need to stop</span>
+                    <h2 class="mt-1 font-semibold text-ink tracking-tight" style="font-size:18px;">Cancel this request</h2>
+                    <p class="mt-2 text-[12.5px] text-[#6B7280] leading-[1.55]">
+                        Only cancel if blood is no longer needed. We'll notify pledged donors immediately and free up reserved units.
+                    </p>
+                    <form action="/requester/requests/<%= r._id %>/cancel" method="POST" class="mt-4">
+                        <button type="submit" class="w-full h-11 rounded-[10px] bg-white border border-[#C8232C]/40 text-[#C8232C] font-semibold text-[14px] hover:bg-[#FCE9EA]">
+                            Cancel request
+                        </button>
+                    </form>
+                </div>
+            <% } %>
+        </aside>
+    </div>
+</div>
+
+<div data-live-banner class="hidden fixed top-20 right-4 bg-ink text-white px-4 py-2 rounded-[10px] text-[13px] font-semibold z-50"></div>
+
+<%- include('../partials/appShellEnd') %>

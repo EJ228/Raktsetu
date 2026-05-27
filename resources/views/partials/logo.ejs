@@ -1,0 +1,13 @@
+<%
+    var logoSize = (typeof size !== 'undefined') ? size : 28;
+%>
+<a href="/" class="inline-flex items-center gap-2">
+    <span class="grid place-items-center rounded-[8px]" style="width:<%= logoSize %>px;height:<%= logoSize %>px;background:#C8232C;color:white;">
+        <svg width="<%= logoSize*0.6 %>" height="<%= logoSize*0.6 %>" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+        </svg>
+    </span>
+    <span class="font-semibold tracking-tight text-ink" style="font-size:<%= logoSize*0.72 %>px;letter-spacing:-0.01em;">
+        Rakt<span style="color:#C8232C;">Setu</span>
+    </span>
+</a>

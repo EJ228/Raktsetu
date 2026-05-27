@@ -1,0 +1,90 @@
+<%
+    /* locals expected: user (req.user), active (nav id), shellTitle, shellSubtitle */
+    var navMap = {
+        donor: [
+            { id: 'dashboard', icon: 'activity',  label: 'Dashboard',         href: '/donor/dashboard' },
+            { id: 'profile',   icon: 'user',      label: 'Profile & settings',href: '/donor/profile' },
+            { id: 'notif',     icon: 'bell',      label: 'Notifications',     href: '/notifications' },
+        ],
+        requester: [
+            { id: 'create',    icon: 'plus',      label: 'New request',       href: '/requester/new' },
+            { id: 'my',        icon: 'heart',     label: 'My requests',       href: '/requester/my' },
+            { id: 'search',    icon: 'search',    label: 'Find blood banks',  href: '/search' },
+            { id: 'notif',     icon: 'bell',      label: 'Notifications',     href: '/notifications' },
+        ],
+        bank_admin: [
+            { id: 'dashboard', icon: 'activity',  label: 'Dashboard',         href: '/bank/dashboard' },
+            { id: 'inventory', icon: 'droplet',   label: 'Inventory',         href: '/bank/inventory' },
+            { id: 'requests',  icon: 'heart',     label: 'Open requests',     href: '/bank/requests' },
+            { id: 'pledges',   icon: 'users',     label: 'Donor pledges',     href: '/bank/pledges' },
+            { id: 'notif',     icon: 'bell',      label: 'Notifications',     href: '/notifications' },
+        ],
+    };
+    var nav = navMap[user.role] || [];
+    var roleLabel = { donor: 'Donor', requester: 'Requester', bank_admin: 'Blood bank' }[user.role] || '';
+    var safeActive = (typeof active !== 'undefined') ? active : '';
+    var safeTitle = (typeof shellTitle !== 'undefined') ? shellTitle : '';
+    var safeSubtitle = (typeof shellSubtitle !== 'undefined') ? shellSubtitle : '';
+%>
+<div class="flex bg-[#FAFAFA] min-h-screen">
+    <aside class="hidden md:flex w-[244px] shrink-0 border-r border-[#E5E7EB] bg-white flex-col">
+        <div class="h-[72px] px-6 flex items-center border-b border-[#E5E7EB]">
+            <%- include('logo', { size: 24 }) %>
+        </div>
+        <nav class="p-3 flex-1">
+            <div class="px-3 py-2 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-[#9CA3AF]"><%= roleLabel %></div>
+            <ul class="flex flex-col gap-0.5">
+                <% nav.forEach(function(n) { var on = (safeActive === n.id); %>
+                    <li>
+                        <a href="<%= n.href %>" class="flex items-center gap-3 h-10 px-3 rounded-[8px] text-[13.5px] font-semibold transition-colors" style="background:<%= on ? '#FCE9EA' : 'transparent' %>;color:<%= on ? '#C8232C' : '#1A1A1A' %>;">
+                            <%- include('icon', { name: n.icon, size: 16, stroke: on ? 2.3 : 2 }) %>
+                            <span class="flex-1"><%= n.label %></span>
+                        </a>
+                    </li>
+                <% }); %>
+            </ul>
+        </nav>
+        <div class="p-3 border-t border-[#E5E7EB]">
+            <div class="flex items-center gap-3 px-2 py-2">
+                <%- include('avatar', { name: user.name, size: 36 }) %>
+                <div class="flex-1 min-w-0">
+                    <div class="text-[13px] font-semibold text-ink truncate"><%= user.name %></div>
+                    <div class="text-[11px] text-[#6B7280] truncate"><%= user.email %></div>
+                </div>
+            </div>
+            <form action="/logout" method="POST" class="px-2 mt-1">
+                <button type="submit" class="w-full text-left text-[12px] text-[#6B7280] hover:text-ink py-1">Sign out →</button>
+            </form>
+        </div>
+    </aside>
+
+    <div class="flex-1 min-w-0 flex flex-col">
+        <header class="h-[72px] border-b border-[#E5E7EB] bg-white px-5 md:px-8 flex items-center gap-4">
+            <div class="md:hidden"><%- include('logo', { size: 22 }) %></div>
+            <div class="flex-1 min-w-0">
+                <% if (safeSubtitle) { %><div class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#9CA3AF]"><%= safeSubtitle %></div><% } %>
+                <% if (safeTitle) { %><h1 class="font-bold text-ink tracking-tight" style="font-size:22px;letter-spacing:-0.02em;line-height:1.2;"><%= safeTitle %></h1><% } %>
+            </div>
+            <div class="hidden md:flex items-center gap-2 shrink-0">
+                <div class="flex items-center gap-2 h-10 px-3 rounded-[10px] border border-[#E5E7EB] bg-white w-[240px]">
+                    <%- include('icon', { name: 'search', size: 14 }) %>
+                    <input placeholder="Search…" class="flex-1 bg-transparent outline-none text-[13px] placeholder:text-[#9CA3AF]" />
+                </div>
+                <a href="/notifications" class="h-10 w-10 grid place-items-center rounded-[10px] border border-[#E5E7EB] relative" data-live-dot>
+                    <%- include('icon', { name: 'bell', size: 16 }) %>
+                    <span class="absolute top-2 right-2 h-1.5 w-1.5 rounded-full bg-[#C8232C]"></span>
+                </a>
+            </div>
+        </header>
+
+        <nav class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-[#E5E7EB] flex items-center justify-around z-30">
+            <% nav.slice(0, 5).forEach(function(n) { var on = (safeActive === n.id); %>
+                <a href="<%= n.href %>" class="flex flex-col items-center justify-center gap-0.5 px-2 py-2" style="color:<%= on ? '#C8232C' : '#9CA3AF' %>;">
+                    <%- include('icon', { name: n.icon, size: 20, stroke: on ? 2.3 : 2 }) %>
+                    <span class="text-[10px] font-semibold"><%= n.label.split(' ')[0] %></span>
+                </a>
+            <% }); %>
+        </nav>
+
+        <div class="flex-1 overflow-auto px-5 md:px-8 py-6 md:py-8 pb-24 md:pb-8">
+            <div class="max-w-[1200px] mx-auto">

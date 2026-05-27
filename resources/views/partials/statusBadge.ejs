@@ -1,0 +1,13 @@
+<%
+    var statusCfg = {
+        pending:   { label: 'Pending',        bg: '#FEF3C7', fg: '#92400E', dot: '#F59E0B' },
+        matched:   { label: 'Matched',        bg: '#DBEAFE', fg: '#1E40AF', dot: '#3B82F6' },
+        assigned:  { label: 'Donor Assigned', bg: '#EDE9FE', fg: '#5B21B6', dot: '#7C3AED' },
+        fulfilled: { label: 'Fulfilled',      bg: '#D1FAE5', fg: '#065F46', dot: '#10B981' },
+        cancelled: { label: 'Cancelled',      bg: '#F3F4F6', fg: '#4B5563', dot: '#9CA3AF' },
+    }[status] || { label: status, bg: '#F3F4F6', fg: '#4B5563', dot: '#9CA3AF' };
+%>
+<span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[12px] font-semibold" style="background:<%= statusCfg.bg %>;color:<%= statusCfg.fg %>;">
+    <span class="h-1.5 w-1.5 rounded-full" style="background:<%= statusCfg.dot %>;"></span>
+    <%= statusCfg.label %>
+</span>

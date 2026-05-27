@@ -1,0 +1,189 @@
+<%- include('../partials/appShellStart', { active: 'create', shellTitle: 'Create a blood request', shellSubtitle: 'Requester' }) %>
+
+<form action="/requester/new" method="POST" class="max-w-[820px] mx-auto" data-stepper>
+    <!-- Progress indicator -->
+    <div class="flex items-center justify-between mb-8 gap-2">
+        <% ['Patient', 'Blood need', 'Bank', 'Urgency', 'Confirm'].forEach(function(s, i){ %>
+            <div class="flex items-center gap-2 flex-1">
+                <span data-step-dot class="rs-step-pending h-8 w-8 rounded-full grid place-items-center text-[12px] font-bold border shrink-0"><%= i + 1 %></span>
+                <span class="text-[12.5px] font-semibold text-ink hidden md:inline"><%= s %></span>
+                <% if (i < 4) { %><div class="flex-1 h-px bg-[#E5E7EB]"></div><% } %>
+            </div>
+        <% }); %>
+    </div>
+
+    <!-- STEP 1: Patient -->
+    <div data-step class="bg-white rounded-[14px] border border-[#E5E7EB] p-6 md:p-8">
+        <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">Step 1 of 5</span>
+        <h2 class="mt-2 font-bold text-ink tracking-tight" style="font-size:24px;letter-spacing:-0.02em;">Who is the patient?</h2>
+        <p class="text-[14px] text-[#6B7280] mt-1">Their name stays private to the public; only the bank sees it.</p>
+        <div class="mt-6 grid md:grid-cols-2 gap-4">
+            <label class="flex flex-col gap-1.5"><span class="text-[13px] font-medium">Full name <span class="text-[#C8232C]">*</span></span>
+                <input name="patientName" required class="h-11 px-3.5 rounded-[10px] border border-[#E5E7EB] outline-none text-[14px]" />
+            </label>
+            <label class="flex flex-col gap-1.5"><span class="text-[13px] font-medium">Age <span class="text-[#C8232C]">*</span></span>
+                <input name="patientAge" type="number" required min="0" max="120" class="h-11 px-3.5 rounded-[10px] border border-[#E5E7EB] outline-none text-[14px]" />
+            </label>
+            <label class="flex flex-col gap-1.5"><span class="text-[13px] font-medium">Gender</span>
+                <select name="patientGender" class="h-11 px-3.5 rounded-[10px] border border-[#E5E7EB] outline-none text-[14px]">
+                    <option value="other">Other</option><option value="male">Male</option><option value="female">Female</option>
+                </select>
+            </label>
+            <label class="flex flex-col gap-1.5 md:col-span-2"><span class="text-[13px] font-medium">Condition (optional)</span>
+                <input name="condition" placeholder="e.g. Cardiac surgery, Thalassaemia" class="h-11 px-3.5 rounded-[10px] border border-[#E5E7EB] outline-none text-[14px]" />
+            </label>
+        </div>
+    </div>
+
+    <!-- STEP 2: Blood need -->
+    <div data-step class="bg-white rounded-[14px] border border-[#E5E7EB] p-6 md:p-8 hidden">
+        <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">Step 2 of 5</span>
+        <h2 class="mt-2 font-bold text-ink tracking-tight" style="font-size:24px;letter-spacing:-0.02em;">What exactly is needed?</h2>
+        <p class="text-[14px] text-[#6B7280] mt-1">We'll match you with banks that have inventory, and notify compatible donors nearby.</p>
+
+        <div class="mt-6 grid gap-5">
+            <!-- Blood group -->
+            <label class="flex flex-col gap-1.5"><span class="text-[13px] font-medium">Blood group <span class="text-[#C8232C]">*</span></span>
+                <select name="bloodGroup" required class="h-11 px-3.5 rounded-[10px] border border-[#E5E7EB] outline-none text-[14px]">
+                    <option value="">Select</option>
+                    <% ['A+','A-','B+','B-','AB+','AB-','O+','O-'].forEach(function(g){ %><option value="<%= g %>"><%= g %></option><% }); %>
+                </select>
+            </label>
+
+            <!-- Blood component cards -->
+            <div>
+                <span class="text-[13px] font-medium">Blood component <span class="text-[#C8232C]">*</span></span>
+                <div class="mt-2 grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <% [
+                        { id: 'whole_blood', label: 'Whole blood', sub: 'Most common' },
+                        { id: 'rbc', label: 'RBC concentrate', sub: 'Anaemia, surgery' },
+                        { id: 'plasma', label: 'Plasma', sub: 'Burns, clotting disorders' },
+                        { id: 'platelets', label: 'Platelets', sub: 'Cancer, dengue' },
+                    ].forEach(function(c, i){ %>
+                        <label data-component-card class="cursor-pointer rounded-[10px] border-2 p-3.5 transition-colors" style="border-color:<%= i === 0 ? '#C8232C' : '#E5E7EB' %>;">
+                            <input type="radio" name="component" value="<%= c.id %>" <%= i === 0 ? 'checked' : '' %> class="hidden" />
+                            <div class="flex items-center gap-2 mb-2">
+                                <%- include('../partials/icon', { name: 'droplet', size: 14, className: i === 0 ? 'text-[#C8232C]' : 'text-[#9CA3AF]' }) %>
+                                <% if (i === 0) { %><%- include('../partials/icon', { name: 'check-circle', size: 13, className: 'text-[#C8232C]' }) %><% } %>
+                            </div>
+                            <div class="text-[13.5px] font-semibold text-ink"><%= c.label %></div>
+                            <div class="text-[11px] text-[#6B7280] mt-0.5"><%= c.sub %></div>
+                        </label>
+                    <% }); %>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-4">
+                <!-- Units needed with +/- -->
+                <div class="flex flex-col gap-1.5">
+                    <span class="text-[13px] font-medium">Units needed <span class="text-[#C8232C]">*</span></span>
+                    <div class="flex items-center gap-0 h-11">
+                        <button type="button" data-unit-dec class="h-full w-11 rounded-l-[10px] border border-[#E5E7EB] bg-[#FAFAFA] text-ink font-bold text-[18px] grid place-items-center hover:bg-[#F3F4F6]">−</button>
+                        <input name="unitsNeeded" type="number" required min="1" max="20" value="2" class="h-full w-14 border-y border-[#E5E7EB] text-center text-[15px] font-semibold outline-none" readonly />
+                        <button type="button" data-unit-inc class="h-full w-11 rounded-r-[10px] border border-[#E5E7EB] bg-[#FAFAFA] text-ink font-bold text-[18px] grid place-items-center hover:bg-[#F3F4F6]">+</button>
+                    </div>
+                </div>
+
+                <!-- Needed by -->
+                <label class="flex flex-col gap-1.5"><span class="text-[13px] font-medium">Needed by <span class="text-[#C8232C]">*</span></span>
+                    <div class="flex items-center gap-2.5 h-11 px-3.5 rounded-[10px] border border-[#E5E7EB]">
+                        <%- include('../partials/icon', { name: 'calendar', size: 14, className: 'text-[#9CA3AF]' }) %>
+                        <input name="neededBy" type="datetime-local" required class="flex-1 bg-transparent text-[14px] outline-none" />
+                    </div>
+                    <span class="text-[11px] text-[#6B7280]">The deadline drives urgency suggestions.</span>
+                </label>
+            </div>
+
+            <!-- Hospital / location -->
+            <label class="flex flex-col gap-1.5"><span class="text-[13px] font-medium">Hospital / location of patient <span class="text-[#C8232C]">*</span></span>
+                <div class="flex items-center gap-2.5 h-11 px-3.5 rounded-[10px] border border-[#E5E7EB]">
+                    <%- include('../partials/icon', { name: 'map-pin', size: 14, className: 'text-[#9CA3AF]' }) %>
+                    <input name="hospitalLocation" placeholder="Govt. Medical College Hospital, Bhangagarh, Guwahati" class="flex-1 bg-transparent text-[14px] outline-none" />
+                </div>
+            </label>
+        </div>
+
+        <!-- Compatibility info callout -->
+        <div class="mt-6 flex items-start gap-3 bg-[#F0FDF4] rounded-[10px] px-4 py-3 border border-[#D1FAE5]">
+            <%- include('../partials/icon', { name: 'check-circle', size: 16, className: 'text-[#10B981] mt-0.5 shrink-0' }) %>
+            <p class="text-[12.5px] text-[#6B7280] leading-[1.55]">Based on compatibility, donors with <strong class="text-ink">A+, A−, O+ or O−</strong> can give to this patient. We'll automatically broadcast to all four groups within your search radius.</p>
+        </div>
+    </div>
+
+    <!-- STEP 3: Bank -->
+    <div data-step class="bg-white rounded-[14px] border border-[#E5E7EB] p-6 md:p-8 hidden">
+        <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">Step 3 of 5</span>
+        <h2 class="mt-2 font-bold text-ink tracking-tight" style="font-size:24px;letter-spacing:-0.02em;">Pick a blood bank</h2>
+        <p class="text-[14px] text-[#6B7280] mt-1">We'll route the request to this bank's admin.</p>
+        <div class="mt-6 grid gap-2 max-h-[400px] overflow-y-auto pr-2">
+            <% banks.forEach(function(b, i){ %>
+                <label class="cursor-pointer flex items-start gap-3 p-4 rounded-[10px] border border-[#E5E7EB] hover:border-ink/40">
+                    <input type="radio" name="bloodBankId" value="<%= b._id %>" <%= i === 0 ? 'required' : '' %> class="mt-1" />
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2">
+                            <span class="font-semibold text-ink text-[14px]"><%= b.name %></span>
+                            <% if (b.verified) { %><span class="text-[10.5px] font-semibold px-1.5 py-0.5 rounded-full bg-[#D1FAE5] text-[#065F46]">Verified</span><% } %>
+                        </div>
+                        <div class="text-[12.5px] text-[#6B7280] mt-0.5"><%= b.address %>, <%= b.city %></div>
+                    </div>
+                </label>
+            <% }); %>
+        </div>
+    </div>
+
+    <!-- STEP 4: Urgency -->
+    <div data-step class="bg-white rounded-[14px] border border-[#E5E7EB] p-6 md:p-8 hidden">
+        <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">Step 4 of 5</span>
+        <h2 class="mt-2 font-bold text-ink tracking-tight" style="font-size:24px;letter-spacing:-0.02em;">How urgent is it?</h2>
+        <div class="mt-6 grid md:grid-cols-3 gap-3">
+            <% [
+                { id: 'normal',   label: 'Normal',   sub: 'Within a week. Routine planning, no emergency.' },
+                { id: 'urgent',   label: 'Urgent',   sub: 'Within 24-48 hours. Scheduled surgery / treatment.' },
+                { id: 'critical', label: 'Critical', sub: 'Within hours. Life-threatening; we ping donors immediately.' },
+            ].forEach(function(u, i){ %>
+                <label class="cursor-pointer rounded-[10px] border-2 p-5" style="border-color: <%= i === 0 ? '#C8232C' : '#E5E7EB' %>;">
+                    <input type="radio" name="urgency" value="<%= u.id %>" <%= i === 0 ? 'checked' : '' %> class="hidden" />
+                    <div class="font-semibold text-ink text-[15px]"><%= u.label %></div>
+                    <p class="text-[12.5px] text-[#6B7280] mt-1.5 leading-snug"><%= u.sub %></p>
+                </label>
+            <% }); %>
+        </div>
+    </div>
+
+    <!-- STEP 5: Confirm + contact -->
+    <div data-step class="bg-white rounded-[14px] border border-[#E5E7EB] p-6 md:p-8 hidden">
+        <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">Step 5 of 5</span>
+        <h2 class="mt-2 font-bold text-ink tracking-tight" style="font-size:24px;letter-spacing:-0.02em;">How can the bank reach you?</h2>
+        <div class="mt-6 grid md:grid-cols-2 gap-4">
+            <label class="flex flex-col gap-1.5"><span class="text-[13px] font-medium">Phone <span class="text-[#C8232C]">*</span></span>
+                <input name="phone" type="tel" required placeholder="+91 98765 43210" value="<%= user.phone || '' %>" class="h-11 px-3.5 rounded-[10px] border border-[#E5E7EB] outline-none text-[14px]" />
+            </label>
+            <label class="flex flex-col gap-1.5"><span class="text-[13px] font-medium">City <span class="text-[#C8232C]">*</span></span>
+                <input name="city" required value="<%= user.city || '' %>" class="h-11 px-3.5 rounded-[10px] border border-[#E5E7EB] outline-none text-[14px]" />
+            </label>
+            <label class="flex flex-col gap-1.5 md:col-span-2"><span class="text-[13px] font-medium">Address (optional)</span>
+                <input name="address" placeholder="Patient ward / hospital section" class="h-11 px-3.5 rounded-[10px] border border-[#E5E7EB] outline-none text-[14px]" />
+            </label>
+        </div>
+        <div class="mt-6 p-4 rounded-[10px] bg-[#FAFAFA] text-[12.5px] text-[#6B7280] leading-relaxed">
+            By submitting, you confirm the patient details are accurate. Compatible donors near the selected bank will be notified instantly for urgent and critical requests.
+        </div>
+    </div>
+
+    <!-- Nav buttons -->
+    <div class="mt-6 flex justify-between items-center">
+        <button type="button" data-step-prev class="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#6B7280] hover:text-ink">
+            <%- include('../partials/icon', { name: 'arrow-left', size: 14 }) %>
+            Back
+        </button>
+        <div class="flex items-center gap-4">
+            <span data-step-counter class="text-[13px] text-[#9CA3AF] hidden md:inline">Step 1 of 5</span>
+            <button type="button" data-step-next class="rs-btn-primary h-[48px] px-6 rounded-[10px] font-semibold text-[14px] inline-flex items-center gap-2">
+                Continue
+                <%- include('../partials/icon', { name: 'arrow-right', size: 16 }) %>
+            </button>
+        </div>
+    </div>
+</form>
+
+<%- include('../partials/appShellEnd') %>

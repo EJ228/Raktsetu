@@ -1,0 +1,20 @@
+<% 
+    // Types: 'error' (red), 'warning' (yellow), 'info' (blue)
+    var bg = tone === 'error' ? '#FEF2F2' : (tone === 'warning' ? '#FEFCE8' : '#EFF6FF');
+    var border = tone === 'error' ? '#FECACA' : (tone === 'warning' ? '#FEF08A' : '#BFDBFE');
+    var text = tone === 'error' ? '#C8232C' : (tone === 'warning' ? '#A16207' : '#1D4ED8');
+%>
+<div class="rounded-[10px] border p-4 flex items-start gap-3" style="background:<%= bg %>; border-color:<%= border %>;">
+    <div class="shrink-0 mt-0.5" style="color:<%= text %>;">
+        <%- include('icon', { name: icon, size: 16 }) %>
+    </div>
+    <div class="flex-1">
+        <h4 class="font-semibold text-[13.5px]" style="color:<%= text %>;"><%= title %></h4>
+        <p class="text-[13px] mt-0.5" style="color:<%= text %>; opacity: 0.85;"><%= desc %></p>
+    </div>
+    <% if (locals.action) { %>
+        <a href="<%= action.href %>" class="shrink-0 font-semibold text-[13px] flex items-center gap-1 hover:underline" style="color:<%= text %>;">
+            <%= action.text %> <%- include('icon', { name: 'arrow-right', size: 14 }) %>
+        </a>
+    <% } %>
+</div>

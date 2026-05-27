@@ -1,0 +1,323 @@
+<%- include('partials/landingNav') %>
+
+<!-- HERO -->
+<section class="relative overflow-hidden">
+    <div class="absolute inset-0 rs-map-bg opacity-40"></div>
+    <div class="relative max-w-[1200px] mx-auto px-5 md:px-8 pt-12 md:pt-20 pb-12 md:pb-16 grid md:grid-cols-2 gap-12 items-center">
+        <div class="rs-in">
+            <span class="inline-flex items-center gap-2 bg-[#FCE9EA] text-[#C8232C] text-[12px] font-semibold px-3.5 py-1.5 rounded-full">
+                <span class="h-1.5 w-1.5 rounded-full bg-[#C8232C] rs-pulse" style="color:#C8232C;"></span>
+                Live network · <%= stats.donors %> active requests right now
+            </span>
+            <h1 class="mt-6 font-bold text-ink tracking-tight" style="font-size:clamp(36px, 5vw, 56px); letter-spacing: -0.03em; line-height: 1.05;">
+                Every drop counts.<br/>
+                <span class="text-[#C8232C]">Every donor matters.</span>
+            </h1>
+            <p class="mt-6 text-[16px] md:text-[17px] text-[#6B7280] leading-[1.6] max-w-[520px]">
+                RaktSetu connects donors, patients, and blood banks across India in real time — so the right unit reaches the right person in the hour it matters most.
+            </p>
+            <div class="mt-8 flex flex-wrap gap-3">
+                <% if (typeof user !== 'undefined' && user) { %>
+                    <a href="<%= user.role === 'donor' ? '/donor/dashboard' : user.role === 'requester' ? '/requester/new' : '/bank/dashboard' %>"
+                       class="rs-btn-primary inline-flex items-center gap-2 h-[52px] px-6 rounded-[10px] font-semibold text-[15px]">
+                        <%= user.role === 'donor' ? 'Go to dashboard' : user.role === 'requester' ? 'New request' : 'Bank dashboard' %>
+                        <%- include('partials/icon', { name: 'arrow-right', size: 18 }) %>
+                    </a>
+                <% } else { %>
+                    <a href="/register?role=donor" class="rs-btn-primary inline-flex items-center gap-2 h-[52px] px-6 rounded-[10px] font-semibold text-[15px]">
+                        Become a donor
+                        <%- include('partials/icon', { name: 'arrow-right', size: 18 }) %>
+                    </a>
+                    <a href="/register?role=requester" class="inline-flex items-center gap-2 h-[52px] px-6 rounded-[10px] bg-white border border-[#E5E7EB] text-ink font-semibold text-[15px] hover:bg-[#FAFAFA]">
+                        Request blood
+                    </a>
+                <% } %>
+            </div>
+            <!-- Trust badges -->
+            <div class="mt-6 flex flex-wrap items-center gap-5 text-[12px] text-[#6B7280]">
+                <span class="inline-flex items-center gap-1.5">
+                    <%- include('partials/icon', { name: 'check-circle', size: 13, className: 'text-[#10B981]' }) %>
+                    100% free for donors
+                </span>
+            </div>
+        </div>
+
+        <!-- hero visual: pulse map with alert card -->
+        <div class="relative hidden md:block">
+            <div class="relative aspect-square w-full max-w-[480px] mx-auto">
+                <div class="absolute inset-0 rounded-[18px] bg-white border border-[#E5E7EB]" style="box-shadow:0 1px 3px rgba(0,0,0,0.04);"></div>
+                <div class="absolute inset-[30px] rounded-full" style="background: radial-gradient(circle at center, #FCE9EA, transparent 70%);"></div>
+                <% [0,1,2].forEach(function(i){ %>
+                    <div class="absolute rounded-full border border-[#C8232C]/20" style="inset:<%= 50 + i*45 %>px;"></div>
+                <% }); %>
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-16 w-16 rounded-full bg-[#C8232C] grid place-items-center" style="box-shadow: 0 12px 30px -6px rgba(200,35,44,0.4);">
+                    <%- include('partials/icon', { name: 'droplet', size: 28, stroke: 2.2, className: 'text-white' }) %>
+                </div>
+                <!-- floating blood group labels -->
+                <% [{l:'18%',t:'22%',g:'O+'},{l:'80%',t:'18%',g:'B-'},{l:'16%',t:'62%',g:'A-'},{l:'55%',t:'75%',g:'A+'},{l:'82%',t:'58%',g:'AB+'}].forEach(function(p){ %>
+                    <div class="absolute" style="left:<%= p.l %>;top:<%= p.t %>;transform:translate(-50%,-50%);">
+                        <span class="text-[13px] font-bold text-[#C8232C]"><%= p.g %></span>
+                    </div>
+                <% }); %>
+                <!-- Alert card -->
+                <% if (urgent.length > 0) { var firstReq = urgent[0]; %>
+                    <div class="absolute bottom-6 left-4 right-4 bg-white rounded-[12px] border border-[#E5E7EB] px-4 py-3 flex items-start gap-3" style="box-shadow:0 6px 20px rgba(0,0,0,0.08);">
+                        <div class="h-8 w-8 rounded-full bg-[#FCE9EA] grid place-items-center text-[#C8232C] shrink-0 mt-0.5">
+                            <%- include('partials/icon', { name: 'droplet', size: 14 }) %>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2 text-[11px]">
+                                <span class="font-bold text-[#C8232C] uppercase">Critical</span>
+                                <span class="text-[#9CA3AF]">· now</span>
+                            </div>
+                            <div class="text-[13px] font-semibold text-ink mt-0.5"><%= firstReq.unitsNeeded %> units of <%= firstReq.bloodGroup %> needed at <%= firstReq.bloodBankId ? firstReq.bloodBankId.name : 'a partner bank' %></div>
+                            <div class="text-[11px] text-[#6B7280]"><%= firstReq.bloodBankId ? firstReq.bloodBankId.city : '' %></div>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <!-- live stats strip -->
+    <div class="relative max-w-[1200px] mx-auto px-5 md:px-8 pb-16">
+        <div class="grid grid-cols-3 gap-4">
+            <% [
+                { val: stats.donors.toLocaleString('en-IN'), lbl: 'Donors registered' },
+                { val: stats.units.toLocaleString('en-IN'),  lbl: 'Units available right now' },
+                { val: stats.lives.toLocaleString('en-IN'),  lbl: 'Lives saved this month' },
+            ].forEach(function(s){ %>
+                <div class="bg-white rounded-[14px] border border-[#E5E7EB] px-5 py-5">
+                    <div class="font-bold text-ink tracking-tight tabular-nums" style="font-size:clamp(22px, 3vw, 34px); letter-spacing: -0.02em;"><%= s.val %></div>
+                    <div class="text-[12.5px] text-[#6B7280] mt-1"><%= s.lbl %></div>
+                </div>
+            <% }); %>
+        </div>
+    </div>
+</section>
+
+<!-- FIND BLOOD NOW -->
+<section class="bg-white py-12 md:py-16 border-y border-[#E5E7EB]">
+    <div class="max-w-[1200px] mx-auto px-5 md:px-8">
+        <div class="flex items-end justify-between mb-6">
+            <div>
+                <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">Find blood now</span>
+                <h2 class="mt-2 font-bold text-ink tracking-tight" style="font-size:clamp(22px,3vw,30px);letter-spacing:-0.025em;">
+                    Search across <%= stats.donors %>+ partner blood banks
+                </h2>
+            </div>
+            <a href="/search" class="text-[13px] font-semibold text-[#C8232C] hover:underline">See full directory →</a>
+        </div>
+        <form action="/search" method="GET" class="grid md:grid-cols-4 gap-4 items-end">
+            <label class="flex flex-col gap-1.5">
+                <span class="text-[12px] font-medium text-[#6B7280]">Blood group</span>
+                <div class="relative">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#9CA3AF]"><%- include('partials/icon', { name: 'droplet', size: 14 }) %></span>
+                    <select name="bloodGroup" class="w-full h-12 pl-9 pr-3 rounded-[10px] border border-[#E5E7EB] outline-none text-[14px] bg-white">
+                        <option value="">Any group</option>
+                        <% ['A+','A-','B+','B-','AB+','AB-','O+','O-'].forEach(function(g){ %>
+                            <option value="<%= g %>"><%= g %></option>
+                        <% }); %>
+                    </select>
+                </div>
+            </label>
+            <label class="flex flex-col gap-1.5">
+                <span class="text-[12px] font-medium text-[#6B7280]">City</span>
+                <div class="relative">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#9CA3AF]"><%- include('partials/icon', { name: 'map-pin', size: 14 }) %></span>
+                    <input type="text" name="city" placeholder="Guwahati" class="w-full h-12 pl-9 pr-3 rounded-[10px] border border-[#E5E7EB] outline-none text-[14px]" />
+                </div>
+            </label>
+            <label class="flex flex-col gap-1.5">
+                <span class="text-[12px] font-medium text-[#6B7280]">Component</span>
+                <div class="relative">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#9CA3AF]"><%- include('partials/icon', { name: 'sliders', size: 14 }) %></span>
+                    <select name="component" class="w-full h-12 pl-9 pr-3 rounded-[10px] border border-[#E5E7EB] outline-none text-[14px] bg-white">
+                        <option value="">Whole blood</option>
+                        <option value="rbc">RBC</option>
+                        <option value="plasma">Plasma</option>
+                        <option value="platelets">Platelets</option>
+                    </select>
+                </div>
+            </label>
+            <button type="submit" class="rs-btn-primary h-12 rounded-[10px] font-semibold text-[14px] inline-flex items-center justify-center gap-2">
+                <%- include('partials/icon', { name: 'search', size: 14 }) %>
+                Search
+            </button>
+        </form>
+    </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="bg-[#FAFAFA] py-16 md:py-24">
+    <div class="max-w-[1200px] mx-auto px-5 md:px-8">
+        <div class="mb-12">
+            <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">How it works</span>
+            <h2 class="mt-3 font-bold text-ink tracking-tight" style="font-size:clamp(28px,3.5vw,40px);letter-spacing:-0.025em;">
+                Three small steps. One<br/>profound outcome.
+            </h2>
+        </div>
+        <div class="grid md:grid-cols-3 gap-6">
+            <% [
+                { icon: 'user', title: 'Register in 90 seconds', body: 'Tell us your blood group, city, and how to reach you. We verify quickly and respectfully.' },
+                { icon: 'zap',  title: 'Get matched in real time', body: 'When a compatible request appears near you, we send a single, clear notification — never spam.' },
+                { icon: 'heart',title: 'Save a life nearby', body: 'Pledge with one tap, walk into the partner blood bank, and you\'re done. We handle the paperwork.' },
+            ].forEach(function(step, idx){ %>
+                <div class="bg-white rounded-[14px] border border-[#E5E7EB] p-6 md:p-7 relative overflow-hidden">
+                    <div class="flex items-center justify-between mb-5">
+                        <span class="h-10 w-10 rounded-[10px] bg-[#FCE9EA] grid place-items-center text-[#C8232C]">
+                            <%- include('partials/icon', { name: step.icon, size: 18 }) %>
+                        </span>
+                        <span class="text-[48px] font-bold text-[#E5E7EB] leading-none" style="letter-spacing:-0.04em;">0<%= idx + 1 %></span>
+                    </div>
+                    <h3 class="font-semibold text-ink text-[18px] tracking-tight"><%= step.title %></h3>
+                    <p class="mt-2 text-[14px] text-[#6B7280] leading-[1.55]"><%= step.body %></p>
+                </div>
+            <% }); %>
+        </div>
+    </div>
+</section>
+
+<!-- COMPATIBILITY MATRIX -->
+<section class="py-16 md:py-24 bg-white">
+    <div class="max-w-[1200px] mx-auto px-5 md:px-8 grid md:grid-cols-2 gap-12 items-center">
+        <div>
+            <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">Compatibility</span>
+            <h2 class="mt-3 font-bold text-ink tracking-tight" style="font-size:clamp(28px,3.5vw,40px);letter-spacing:-0.025em;">
+                Who can give to whom.
+            </h2>
+            <p class="mt-4 text-[15px] text-[#6B7280] leading-[1.6] max-w-[520px]">
+                Rows are donors, columns are recipients. O− is a universal donor; AB+ is a universal recipient. RaktSetu's matching engine handles this for you automatically — this chart is just for the curious.
+            </p>
+            <div class="mt-6 flex items-center gap-5 text-[12px] text-[#6B7280]">
+                <span class="inline-flex items-center gap-1.5"><span class="h-3 w-3 rounded-sm bg-[#C8232C]"></span> Compatible</span>
+                <span class="inline-flex items-center gap-1.5"><span class="h-3 w-3 rounded-sm bg-[#F3F4F6]"></span> Not compatible</span>
+            </div>
+        </div>
+        <!-- matrix -->
+        <div class="bg-white rounded-[14px] border border-[#E5E7EB] p-5 overflow-x-auto">
+            <%
+                var groups = ['O-','O+','A-','A+','B-','B+','AB-','AB+'];
+                var matrix = {
+                    'O-' : [1,1,1,1,1,1,1,1], 'O+' : [0,1,0,1,0,1,0,1],
+                    'A-' : [0,0,1,1,0,0,1,1], 'A+' : [0,0,0,1,0,0,0,1],
+                    'B-' : [0,0,0,0,1,1,1,1], 'B+' : [0,0,0,0,0,1,0,1],
+                    'AB-': [0,0,0,0,0,0,1,1], 'AB+': [0,0,0,0,0,0,0,1],
+                };
+            %>
+            <table class="text-[11px] tabular-nums" style="border-spacing:4px;border-collapse:separate;">
+                <thead>
+                    <tr><th></th>
+                        <% groups.forEach(function(g){ %><th class="text-center font-semibold text-[#6B7280]" style="width:48px;padding:4px 2px;"><%= g %></th><% }); %>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% groups.forEach(function(donor, i){ %>
+                    <tr>
+                        <th class="text-right font-semibold text-[#6B7280]" style="padding:4px 8px 4px 0;"><%= donor %></th>
+                        <% matrix[donor].forEach(function(cell, j){ %>
+                            <td style="padding:0;">
+                                <div style="width:48px;height:48px;border-radius:6px;display:grid;place-items:center;" class="<%= cell ? 'rs-compat-yes text-white' : 'rs-compat-no' %>">
+                                    <% if (cell) { %><%- include('partials/icon', { name: 'check', size: 16, stroke: 3, className: 'text-white' }) %><% } %>
+                                </div>
+                            </td>
+                        <% }); %>
+                    </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- RECENT URGENT REQUESTS -->
+<section class="bg-[#FAFAFA] py-16 md:py-24 border-t border-[#E5E7EB]">
+    <div class="max-w-[1200px] mx-auto px-5 md:px-8">
+        <div class="flex items-end justify-between mb-8">
+            <div>
+                <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">Live · Anonymised</span>
+                <h2 class="mt-2 font-bold text-ink tracking-tight" style="font-size:clamp(24px,3vw,32px);letter-spacing:-0.025em;">Recent urgent requests</h2>
+            </div>
+            <a href="/search" class="text-[13px] font-semibold text-ink hover:underline">Find blood banks →</a>
+        </div>
+        <div class="grid md:grid-cols-4 gap-4">
+            <% if (urgent.length === 0) { %>
+                <div class="md:col-span-4 bg-white rounded-[14px] border border-[#E5E7EB] p-10 text-center text-[#6B7280]">
+                    Nothing urgent right now — every patient is matched. 🩸
+                </div>
+            <% } else { urgent.forEach(function(r){ %>
+                <div class="bg-white rounded-[14px] border border-[#E5E7EB] p-5 flex flex-col">
+                    <div class="flex items-center justify-between mb-3">
+                        <%- include('partials/bloodBadge', { group: r.bloodGroup, size: 'lg' }) %>
+                        <%- include('partials/urgencyBadge', { level: r.urgency }) %>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-[14px] font-semibold text-ink"><%= r.bloodGroup %> needed in <%= r.bloodBankId ? r.bloodBankId.city : r.city %></div>
+                        <div class="text-[12.5px] text-[#6B7280] mt-1"><%= r.bloodBankId ? r.bloodBankId.name : 'Partner bank' %></div>
+                    </div>
+                    <div class="flex items-center justify-between mt-4 pt-3 border-t border-[#E5E7EB]">
+                        <span class="inline-flex items-center gap-1.5 text-[11.5px] text-[#9CA3AF]">
+                            <%- include('partials/icon', { name: 'clock', size: 11 }) %>
+                            <%= moment(r.createdAt).fromNow() %>
+                        </span>
+                        <a href="/search?bloodGroup=<%= encodeURIComponent(r.bloodGroup) %>" class="text-[12.5px] font-semibold text-[#C8232C] hover:underline">View →</a>
+                    </div>
+                </div>
+            <% }); } %>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-white border-t border-[#E5E7EB]">
+    <div class="max-w-[1200px] mx-auto px-5 md:px-8 py-12 md:py-16">
+        <div class="grid md:grid-cols-5 gap-10 md:gap-8">
+            <!-- Brand -->
+            <div class="md:col-span-2">
+                <%- include('partials/logo', { size: 28 }) %>
+                <p class="mt-4 text-[13px] text-[#6B7280] leading-[1.6] max-w-[300px]">
+                    A non-profit blood matching network connecting donors, patients and accredited blood banks across India.
+                </p>
+            </div>
+            <!-- Product -->
+            <div>
+                <h4 class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6B7280] mb-4">Product</h4>
+                <ul class="flex flex-col gap-2.5 text-[13px] text-[#6B7280]">
+                    <li><a href="/" class="hover:text-ink">How it works</a></li>
+                    <li><a href="/search" class="hover:text-ink">Find blood</a></li>
+                    <li><a href="/register?role=donor" class="hover:text-ink">Become a donor</a></li>
+                    <li><a href="/register?role=bank_admin" class="hover:text-ink">For blood banks</a></li>
+                </ul>
+            </div>
+            <!-- Resources -->
+            <div>
+                <h4 class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6B7280] mb-4">Resources</h4>
+                <ul class="flex flex-col gap-2.5 text-[13px] text-[#6B7280]">
+                    <li><a href="#" class="hover:text-ink">Help center</a></li>
+                    <li><a href="#" class="hover:text-ink">Eligibility guide</a></li>
+                    <li><a href="#" class="hover:text-ink">Blood facts</a></li>
+                    <li><a href="#" class="hover:text-ink">Compatibility chart</a></li>
+                </ul>
+            </div>
+            <!-- Legal -->
+            <div>
+                <h4 class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6B7280] mb-4">Legal</h4>
+                <ul class="flex flex-col gap-2.5 text-[13px] text-[#6B7280]">
+                    <li><a href="#" class="hover:text-ink">Privacy</a></li>
+                    <li><a href="#" class="hover:text-ink">Terms</a></li>
+                    <li><a href="#" class="hover:text-ink">Data protection</a></li>
+                    <li><a href="#" class="hover:text-ink">NBTC compliance</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="border-t border-[#E5E7EB]">
+        <div class="max-w-[1200px] mx-auto px-5 md:px-8 py-5 flex flex-col md:flex-row items-center justify-between gap-3">
+            <span class="text-[12px] text-[#9CA3AF]">© 2026 RaktSetu Foundation. Made with care in Bengaluru and Guwahati.</span>
+            <div class="flex items-center gap-3 text-[12px] text-[#9CA3AF]">
+                <%- include('partials/icon', { name: 'globe', size: 13 }) %>
+                English · हिन्दी · বাংলা · தமிழ்
+            </div>
+        </div>
+    </div>
+</footer>

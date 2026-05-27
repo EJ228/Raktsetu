@@ -1,0 +1,32 @@
+<div class="bg-white rounded-[14px] border border-[#E5E7EB] p-10 md:p-14 text-center max-w-2xl mx-auto my-8 shadow-sm">
+    <div class="mx-auto h-16 w-16 rounded-full flex items-center justify-center mb-6 <% if(tone === 'blue') { %>bg-[#EFF6FF] text-[#3B82F6]<% } else if (tone === 'green') { %>bg-[#F0FDF4] text-[#10B981]<% } else if (tone === 'gray') { %>bg-[#F9FAFB] text-[#6B7280]<% } else if (tone === 'yellow') { %>bg-[#FEFCE8] text-[#EAB308]<% } else { %>bg-[#FCE9EA] text-[#C8232C]<% } %>">
+        <%- include('icon', { name: icon, size: 24, stroke: 2 }) %>
+    </div>
+
+    <div class="text-[11px] font-bold uppercase tracking-[0.15em] text-[#9CA3AF] mb-3">
+        <%= context %>
+    </div>
+
+    <h2 class="text-[22px] font-bold text-ink tracking-tight mb-4 leading-tight">
+        <%= title %>
+    </h2>
+
+    <p class="text-[14.5px] text-[#6B7280] leading-relaxed max-w-md mx-auto mb-8">
+        <%= desc %>
+    </p>
+
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+        <% if (locals.primaryBtn) { %>
+            <a href="<%= primaryBtn.href %>" class="rs-btn-primary h-12 px-6 rounded-[10px] font-semibold text-[14.5px] inline-flex items-center justify-center gap-2.5 w-full sm:w-auto transition-transform active:scale-95 shadow-sm">
+                <% if (primaryBtn.icon) { %><%- include('icon', { name: primaryBtn.icon, size: 16 }) %><% } %>
+                <%= primaryBtn.text %>
+            </a>
+        <% } %>
+        <% if (locals.secondaryBtn) { %>
+            <a href="<%= secondaryBtn.href %>" class="h-12 px-6 rounded-[10px] bg-white border border-[#E5E7EB] text-ink font-semibold text-[14.5px] inline-flex items-center justify-center gap-2.5 w-full sm:w-auto hover:bg-[#FAFAFA] transition-colors active:scale-95 shadow-sm">
+                <% if (secondaryBtn.icon) { %><%- include('icon', { name: secondaryBtn.icon, size: 16 }) %><% } %>
+                <%= secondaryBtn.text %>
+            </a>
+        <% } %>
+    </div>
+</div>

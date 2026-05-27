@@ -1,0 +1,228 @@
+<%
+    // Build summary stats
+    var available = units.filter(function(u){ return u.status === 'available'; });
+    var totalAvail = available.reduce(function(s,u){ return s + u.units; }, 0);
+    var expiring7 = available.filter(function(u){ return u.daysToExpiry <= 7; }).length;
+    var expiring3within24h = available.filter(function(u){ return u.daysToExpiry <= 1; }).length;
+    var issuedToday = units.filter(function(u){ return u.status === 'issued'; }).length;
+
+    // Build grid: group × component
+    var COMPONENTS = ['whole_blood', 'rbc', 'platelets', 'plasma', 'cryoprecipitate'];
+    var COMP_LABELS = { whole_blood: 'Whole Blood', rbc: 'Packed Red Cells', platelets: 'Platelets', plasma: 'Fresh Frozen Plasma', cryoprecipitate: 'Cryoprecipitate' };
+    var SHELF = { whole_blood: '35 days', rbc: '42 days', platelets: '5 days', plasma: '1 year', cryoprecipitate: '1 year' };
+    var PAR = { whole_blood: 15, rbc: 20, platelets: 8, plasma: 25, cryoprecipitate: 10 };
+
+    var grid = {};
+    GROUPS.forEach(function(g){
+        grid[g] = {};
+        COMPONENTS.forEach(function(c){
+            grid[g][c] = { count: 0, par: PAR[c] || 10, expiring: 0, critical: 0 };
+        });
+    });
+    available.forEach(function(u){
+        var comp = u.component || 'whole_blood';
+        if (!grid[u.bloodGroup]) return;
+        if (!grid[u.bloodGroup][comp]) return;
+        grid[u.bloodGroup][comp].count += u.units;
+        if (u.daysToExpiry <= 7) grid[u.bloodGroup][comp].expiring += u.units;
+        if (u.daysToExpiry <= 2) grid[u.bloodGroup][comp].critical += u.units;
+    });
+
+    // Below safety stock items
+    var belowPar = [];
+    GROUPS.forEach(function(g){
+        COMPONENTS.forEach(function(c){
+            var cell = grid[g][c];
+            if (cell.count < cell.par * 0.4) {
+                belowPar.push({ group: g, component: COMP_LABELS[c] || c, count: cell.count, par: cell.par });
+            }
+        });
+    });
+%>
+
+<%- include('../partials/appShellStart', { active: 'inventory', shellTitle: 'Inventory', shellSubtitle: 'GMC Blood Bank · ' + totalAvail + ' units in cold storage' }) %>
+
+<div class="grid gap-6">
+
+    <!-- KPI row -->
+    <div class="grid md:grid-cols-4 gap-4">
+        <div class="bg-white rounded-[14px] border border-[#E5E7EB] p-5">
+            <div class="h-10 w-10 rounded-[10px] bg-[#F3F4F6] grid place-items-center text-[#6B7280] mb-3">
+                <%- include('../partials/icon', { name: 'droplet', size: 18 }) %>
+            </div>
+            <div class="text-[28px] font-bold text-ink tabular-nums"><%= totalAvail %></div>
+            <div class="text-[12.5px] text-[#6B7280]">Total units</div>
+        </div>
+        <div class="bg-white rounded-[14px] border border-[#E5E7EB] p-5">
+            <div class="h-10 w-10 rounded-[10px] bg-[#FEF3C7] grid place-items-center text-[#F59E0B] mb-3">
+                <%- include('../partials/icon', { name: 'alert-triangle', size: 18 }) %>
+            </div>
+            <div class="text-[28px] font-bold text-ink tabular-nums"><%= belowPar.length %></div>
+            <div class="text-[12.5px] text-[#6B7280]">Below safety stock</div>
+        </div>
+        <div class="bg-[#FEF2F2] rounded-[14px] border border-[#FECACA] p-5">
+            <div class="h-10 w-10 rounded-[10px] bg-[#FCA5A5] grid place-items-center text-[#C8232C] mb-3">
+                <%- include('../partials/icon', { name: 'clock', size: 18 }) %>
+            </div>
+            <div class="text-[28px] font-bold text-ink tabular-nums"><%= expiring7 %></div>
+            <div class="text-[12.5px] text-[#6B7280]">Expiring ≤ 7 days</div>
+        </div>
+        <div class="bg-white rounded-[14px] border border-[#E5E7EB] p-5">
+            <div class="h-10 w-10 rounded-[10px] bg-[#D1FAE5] grid place-items-center text-[#10B981] mb-3">
+                <%- include('../partials/icon', { name: 'check-circle', size: 18 }) %>
+            </div>
+            <div class="text-[28px] font-bold text-ink tabular-nums"><%= issuedToday %></div>
+            <div class="text-[12.5px] text-[#6B7280]">Issued today</div>
+        </div>
+    </div>
+
+    <!-- Inventory Grid -->
+    <div class="bg-white rounded-[14px] border border-[#E5E7EB] overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-[13px]">
+                <thead class="border-b border-[#E5E7EB]">
+                    <tr>
+                        <th class="text-left px-5 py-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#6B7280]">Group</th>
+                        <% COMPONENTS.forEach(function(c){ %>
+                            <th class="text-left px-4 py-4">
+                                <div class="text-[13px] font-semibold text-ink"><%= COMP_LABELS[c] %></div>
+                                <div class="text-[10.5px] text-[#9CA3AF] font-normal">shelf <%= SHELF[c] %></div>
+                            </th>
+                        <% }); %>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% GROUPS.forEach(function(g){ %>
+                        <tr class="border-t border-[#E5E7EB] hover:bg-[#FAFAFA]">
+                            <td class="px-5 py-3.5"><%- include('../partials/bloodBadge', { group: g, size: 'sm' }) %></td>
+                            <% COMPONENTS.forEach(function(c){
+                                var cell = grid[g][c];
+                                var pct = cell.par > 0 ? Math.min(cell.count / cell.par * 100, 100) : 0;
+                                var barColor = pct < 40 ? '#DC2626' : (pct < 70 ? '#F59E0B' : '#10B981');
+                            %>
+                                <td class="px-4 py-3.5">
+                                    <div class="flex items-baseline gap-0.5">
+                                        <span class="text-[15px] font-bold tabular-nums <%= cell.count === 0 ? 'text-[#9CA3AF]' : 'text-ink' %>"><%= cell.count %></span>
+                                        <span class="text-[11px] text-[#9CA3AF]">/<%= cell.par %></span>
+                                    </div>
+                                    <div class="h-1 rounded-full bg-[#F3F4F6] mt-1.5 w-20">
+                                        <div class="h-full rounded-full" style="width:<%= pct %>%;background:<%= barColor %>;"></div>
+                                    </div>
+                                    <% if (cell.expiring > 0) { %>
+                                        <div class="text-[10px] text-[#F59E0B] mt-1">⏱ <%= cell.expiring %> exp</div>
+                                    <% } %>
+                                    <% if (cell.critical > 0) { %>
+                                        <div class="text-[10px] text-[#C8232C]">+ <%= cell.critical %> crit</div>
+                                    <% } %>
+                                </td>
+                            <% }); %>
+                        </tr>
+                    <% }); %>
+                </tbody>
+                <tfoot class="bg-[#FAFAFA] border-t-2 border-[#E5E7EB]">
+                    <tr>
+                        <td class="px-5 py-3.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#6B7280]">Totals</td>
+                        <% COMPONENTS.forEach(function(c){
+                            var total = 0, totalPar = 0;
+                            GROUPS.forEach(function(g){ total += grid[g][c].count; totalPar += grid[g][c].par; });
+                        %>
+                            <td class="px-4 py-3.5">
+                                <div class="text-[15px] font-bold text-ink tabular-nums"><%= total %></div>
+                                <div class="text-[11px] text-[#9CA3AF]">/<%= totalPar %></div>
+                            </td>
+                        <% }); %>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        <div class="px-5 py-3 border-t border-[#E5E7EB] text-[11px] text-[#9CA3AF]">
+            ⓘ Click any number to edit in place · changes are logged to the audit trail.
+        </div>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-6">
+        <!-- Below safety stock -->
+        <div class="bg-white rounded-[14px] border border-[#E5E7EB] p-6">
+            <div class="flex items-start justify-between mb-4">
+                <div>
+                    <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">Below safety stock</span>
+                    <h3 class="font-semibold text-ink text-[18px] mt-0.5 tracking-tight">Action required</h3>
+                </div>
+                <span class="text-[12.5px] font-semibold text-[#C8232C]">Plan drive</span>
+            </div>
+            <% if (belowPar.length === 0) { %>
+                <div class="py-2">
+                    <%- include('../partials/emptyState', {
+                        context: 'BANK · INVENTORY',
+                        icon: 'droplet',
+                        tone: 'yellow',
+                        title: 'All groups well stocked',
+                        desc: 'No groups are currently below safety stock. Maintain regular collection drives to keep levels healthy.',
+                        primaryBtn: { text: 'Schedule camp', href: '#' }
+                    }) %>
+                </div>
+            <% } else { belowPar.slice(0, 5).forEach(function(item){ %>
+                <div class="flex items-center gap-3 py-3 border-b border-[#E5E7EB] last:border-0">
+                    <%- include('../partials/bloodBadge', { group: item.group, size: 'sm' }) %>
+                    <div class="flex-1">
+                        <div class="text-[13px] font-semibold text-ink"><%= item.component %></div>
+                        <div class="text-[11px] text-[#6B7280]">Notify standby donors</div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[14px] font-bold text-[#C8232C] tabular-nums"><%= item.count %></span>
+                        <span class="text-[11px] text-[#9CA3AF]">/<%= item.par %></span>
+                    </div>
+                </div>
+            <% }); } %>
+        </div>
+
+        <!-- Expiry tracking -->
+        <div class="bg-white rounded-[14px] border border-[#E5E7EB] p-6">
+            <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">Expiry tracking · FIFO</span>
+            <h3 class="font-semibold text-ink text-[18px] mt-0.5 tracking-tight mb-4">Units expiring within 7 days</h3>
+            <% var expiringUnits = units.filter(function(u){ return u.status === 'available' && u.daysToExpiry <= 7; }).slice(0, 6); %>
+            <% if (expiringUnits.length === 0) { %>
+                <p class="text-[13px] text-[#6B7280] py-6 text-center">No units expiring soon ✓</p>
+            <% } else { expiringUnits.forEach(function(eu){ %>
+                <div class="flex items-center gap-3 py-2.5 border-b border-[#E5E7EB] last:border-0">
+                    <%- include('../partials/bloodBadge', { group: eu.bloodGroup, size: 'sm' }) %>
+                    <div class="flex-1">
+                        <div class="text-[13px] font-semibold text-ink"><%= (eu.component || 'whole_blood').replace('_', ' ').toUpperCase() %> · U-<%= String(eu._id).slice(-5) %></div>
+                        <div class="text-[11px] text-[#6B7280]">Collected <%= moment(eu.collectionDate).format('MMM DD') %> · expires <%= moment(eu.expiryDate).format('MMM DD') %></div>
+                    </div>
+                </div>
+            <% }); } %>
+        </div>
+    </div>
+
+    <!-- Add inventory card -->
+    <div class="bg-white rounded-[14px] border border-[#E5E7EB] p-6">
+        <h2 class="font-semibold text-ink tracking-tight" style="font-size:18px;">Log a donation</h2>
+        <p class="text-[12.5px] text-[#6B7280] mt-1">Expiry is auto-calculated based on the component type.</p>
+        <form action="/bank/inventory/add" method="POST" class="mt-5 grid md:grid-cols-5 gap-3 items-end">
+            <label class="flex flex-col gap-1.5"><span class="text-[12px] font-medium">Blood group</span>
+                <select name="bloodGroup" required class="h-11 px-3 rounded-[10px] border border-[#E5E7EB] outline-none text-[14px]">
+                    <option value="">—</option>
+                    <% GROUPS.forEach(function(g){ %><option value="<%= g %>"><%= g %></option><% }); %>
+                </select>
+            </label>
+            <label class="flex flex-col gap-1.5"><span class="text-[12px] font-medium">Component</span>
+                <select name="component" class="h-11 px-3 rounded-[10px] border border-[#E5E7EB] outline-none text-[14px]">
+                    <option value="whole_blood">Whole blood</option><option value="rbc">RBC</option><option value="plasma">Plasma</option><option value="platelets">Platelets</option>
+                </select>
+            </label>
+            <label class="flex flex-col gap-1.5"><span class="text-[12px] font-medium">Units</span>
+                <input name="units" type="number" required min="1" value="1" class="h-11 px-3 rounded-[10px] border border-[#E5E7EB] outline-none text-[14px]" />
+            </label>
+            <label class="flex flex-col gap-1.5"><span class="text-[12px] font-medium">Collection date</span>
+                <input name="collectionDate" type="date" required class="h-11 px-3 rounded-[10px] border border-[#E5E7EB] outline-none text-[14px]" />
+            </label>
+            <button type="submit" class="rs-btn-primary h-11 rounded-[10px] font-semibold text-[13px] inline-flex items-center justify-center gap-2">
+                <%- include('../partials/icon', { name: 'plus', size: 14 }) %>
+                Log donation
+            </button>
+        </form>
+    </div>
+</div>
+
+<%- include('../partials/appShellEnd') %>

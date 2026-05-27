@@ -1,0 +1,100 @@
+<%- include('../partials/appShellStart', { active: 'dashboard', shellTitle: 'Bank dashboard', shellSubtitle: user.name + ' · Today, ' + moment().format('DD MMM') }) %>
+
+<div class="grid gap-6" data-bank-id="<%= user.bloodBankId %>">
+
+    <!-- KPIs -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <%- include('../partials/kpiCard', { icon: 'droplet',      value: kpi.totalUnits.toString(),     label: 'Units in stock',      subLabel: 'Across all blood groups' }) %>
+        <%- include('../partials/kpiCard', { icon: 'clock',        value: kpi.expiringSoon.toString(),   label: 'Expiring < 48 hours', subLabel: 'Prioritise these first', tone: kpi.expiringSoon > 0 ? 'danger' : 'default' }) %>
+        <%- include('../partials/kpiCard', { icon: 'heart',        value: kpi.openRequests.toString(),   label: 'Open requests',       subLabel: 'Awaiting fulfilment', tone: 'info' }) %>
+        <%- include('../partials/kpiCard', { icon: 'check-circle', value: kpi.donationsToday.toString(), label: 'Donations today',     subLabel: 'Pledges completed', tone: 'success' }) %>
+    </div>
+
+    <!-- Inventory snapshot + recent requests -->
+    <div class="grid md:grid-cols-12 gap-6">
+        <div class="md:col-span-7 bg-white rounded-[14px] border border-[#E5E7EB] p-6">
+            <div class="flex items-end justify-between mb-5">
+                <div>
+                    <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">Inventory snapshot</span>
+                    <h2 class="mt-1 font-semibold text-ink tracking-tight" style="font-size:18px;">Units by blood group</h2>
+                </div>
+                <a href="/bank/inventory" class="text-[13px] font-semibold text-ink hover:underline">Manage inventory →</a>
+            </div>
+            <% var max = Math.max.apply(null, inventoryByGroup.map(function(g){return g.units;})) || 1; %>
+            <div class="grid gap-3">
+                <% inventoryByGroup.forEach(function(g){ %>
+                    <div class="flex items-center gap-4">
+                        <%- include('../partials/bloodBadge', { group: g.group, size: 'md', variant: g.units > 0 ? 'solid' : 'outline' }) %>
+                        <div class="flex-1 h-7 rounded-md bg-[#F3F4F6] overflow-hidden relative">
+                            <div class="h-full rounded-md transition-all" style="width:<%= g.units > 0 ? Math.round(g.units / max * 100) : 0 %>%;background:#C8232C;"></div>
+                        </div>
+                        <div class="text-[13px] font-semibold tabular-nums text-ink w-12 text-right"><%= g.units %></div>
+                    </div>
+                <% }); %>
+            </div>
+        </div>
+
+        <aside class="md:col-span-5 bg-white rounded-[14px] border border-[#E5E7EB] p-6">
+            <div class="flex items-end justify-between mb-4">
+                <div>
+                    <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">Today's pledged donors</span>
+                    <h2 class="mt-1 font-semibold text-ink tracking-tight" style="font-size:18px;"><%= todaysPledges.length %> waiting to be confirmed</h2>
+                </div>
+            </div>
+            <% if (todaysPledges.length === 0) { %>
+                <p class="text-[13px] text-[#6B7280]">No pledges yet. They'll appear here as donors respond to open requests.</p>
+            <% } else { todaysPledges.slice(0, 5).forEach(function(p){ %>
+                <div class="flex items-center gap-3 py-3 border-b border-[#E5E7EB] last:border-0">
+                    <%- include('../partials/avatar', { name: p.donorId.name, size: 36 }) %>
+                    <div class="flex-1 min-w-0">
+                        <div class="text-[13.5px] font-semibold text-ink truncate"><%= p.donorId.name %></div>
+                        <div class="text-[11.5px] text-[#6B7280]">pledged <%= moment(p.createdAt).fromNow() %></div>
+                    </div>
+                    <% if (p.donorId.bloodGroup) { %><%- include('../partials/bloodBadge', { group: p.donorId.bloodGroup, size: 'sm' }) %><% } %>
+                </div>
+            <% }); %>
+                <a href="/bank/pledges" class="block mt-4 text-center h-10 rounded-[10px] bg-[#FAFAFA] text-ink font-semibold text-[13px] hover:bg-[#F3F4F6] leading-10">
+                    Review all pledges →
+                </a>
+            <% } %>
+        </aside>
+    </div>
+
+    <!-- Recent requests -->
+    <div class="bg-white rounded-[14px] border border-[#E5E7EB] p-6">
+        <div class="flex items-end justify-between mb-5">
+            <div>
+                <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">Open requests · sorted by urgency</span>
+                <h2 class="mt-1 font-semibold text-ink tracking-tight" style="font-size:18px;">Awaiting your action</h2>
+            </div>
+            <a href="/bank/requests" class="text-[13px] font-semibold text-ink hover:underline">All requests →</a>
+        </div>
+        <% if (recentRequests.length === 0) { %>
+            <div class="py-10 text-center text-[13px] text-[#6B7280]">No open requests. You're all caught up. 🎉</div>
+        <% } else { %>
+            <div class="grid gap-3">
+                <% recentRequests.forEach(function(r){ %>
+                    <div class="flex flex-wrap items-start gap-4 p-4 rounded-[10px] border border-[#E5E7EB] hover:border-ink/25">
+                        <%- include('../partials/bloodBadge', { group: r.bloodGroup, size: 'lg' }) %>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 flex-wrap mb-1">
+                                <%- include('../partials/urgencyBadge', { level: r.urgency }) %>
+                                <%- include('../partials/statusBadge', { status: r.status }) %>
+                                <span class="text-[11px] font-mono text-[#9CA3AF]">#RS-<%= String(r._id).slice(-5).toUpperCase() %></span>
+                            </div>
+                            <div class="font-semibold text-ink text-[14px]">
+                                <%= r.unitsNeeded %> unit(s) for <%= r.patientName %>, <%= r.patientAge %>
+                            </div>
+                            <div class="text-[12px] text-[#6B7280] mt-0.5">
+                                Needed by <%= moment(r.neededBy).format('DD MMM, h:mm A') %> · posted <%= moment(r.createdAt).fromNow() %>
+                            </div>
+                        </div>
+                        <a href="/bank/requests" class="rs-btn-primary h-10 px-4 rounded-[10px] font-semibold text-[13px] inline-flex items-center gap-2 shrink-0">Manage</a>
+                    </div>
+                <% }); %>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<%- include('../partials/appShellEnd') %>
