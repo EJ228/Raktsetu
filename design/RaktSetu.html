@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RaktSetu — Screens 1–4</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
+          },
+          colors: {
+            crimson: { DEFAULT: '#C8232C', dark: '#8B1A20' },
+            ink: '#1A1A1A',
+            muted: '#6B7280',
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    html, body, #root { height: 100%; }
+    body {
+      font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      color: #1A1A1A;
+      background: #0E0E10;
+      font-feature-settings: 'ss01', 'cv11';
+    }
+    /* hide native scrollbars on inner panels (not the page) */
+    .min-h-full::-webkit-scrollbar { width: 10px; height: 10px; }
+    .min-h-full::-webkit-scrollbar-track { background: transparent; }
+    .min-h-full::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 8px; }
+
+    /* primary button hover */
+    .rs-btn-primary { background: #C8232C; box-shadow: 0 1px 2px rgba(139,26,32,0.25), inset 0 -1px 0 rgba(0,0,0,0.08); }
+    .rs-btn-primary:hover { background: #B11D26; }
+    .rs-btn-primary:active { background: #8B1A20; }
+
+    /* pulse for critical badges */
+    @keyframes rs-pulse {
+      0%,100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.6); opacity: 0; }
+    }
+    .rs-pulse { position: relative; }
+    .rs-pulse::after {
+      content: ''; position: absolute; inset: 0; border-radius: 999px;
+      background: currentColor; opacity: 0.4; animation: rs-pulse 1.8s ease-out infinite;
+    }
+
+    /* concentric ping for hero */
+    @keyframes rs-ping {
+      0% { transform: scale(0.6); opacity: 1; }
+      100% { transform: scale(1.4); opacity: 0; }
+    }
+    .rs-ping { animation: rs-ping 3.2s cubic-bezier(0.4,0,0.6,1) infinite; }
+    .rs-ping-slow { animation: rs-ping 4.6s cubic-bezier(0.4,0,0.6,1) infinite; animation-delay: 0.6s; }
+    .rs-ping-slower { animation: rs-ping 6s cubic-bezier(0.4,0,0.6,1) infinite; animation-delay: 1.2s; }
+
+    /* floating donor pins on hero */
+    @keyframes rs-float {
+      0%,100% { transform: translate(-50%, -50%) translateY(0); }
+      50%     { transform: translate(-50%, -50%) translateY(-6px); }
+    }
+    .rs-float { animation: rs-float 4s ease-in-out infinite; }
+
+    /* gentle in */
+    @keyframes rs-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    .rs-in { animation: rs-in 0.35s ease both; }
+
+    /* tabular nums everywhere by default for numeric badges */
+    .tabular-nums { font-variant-numeric: tabular-nums; }
+
+    /* keep selects looking clean */
+    select { background-image: none; }
+  </style>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" src="ui.jsx"></script>
+  <script type="text/babel" src="ui-shell.jsx"></script>
+  <script type="text/babel" src="screen-landing.jsx"></script>
+  <script type="text/babel" src="screen-search.jsx"></script>
+  <script type="text/babel" src="screen-login.jsx"></script>
+  <script type="text/babel" src="screen-register.jsx"></script>
+  <script type="text/babel" src="screen-donor-dashboard.jsx"></script>
+  <script type="text/babel" src="screen-donor-profile.jsx"></script>
+  <script type="text/babel" src="screen-pledge.jsx"></script>
+  <script type="text/babel" src="screen-create-request.jsx"></script>
+  <script type="text/babel" src="app.jsx"></script>
+</body>
+</html>
