@@ -2,9 +2,7 @@
 
 RaktSetu (Sanskrit for "blood bridge") is a real-time platform that connects **blood donors**, **patients** who need blood, and **blood banks** in India. It uses live matching, blood-group compatibility logic, and instant donor notifications to shorten the gap between a need and a donation.
 
-> **Built as a refactor** of an existing Node.js + Express + MongoDB delivery app. The original real-time order-tracking pattern was reused for the live request-status flow — every other piece (models, controllers, views, design system) is new.
 
----
 
 ## ✨ Highlights
 
@@ -67,24 +65,6 @@ npm start
 ```
 
 Then open <http://localhost:3000>.
-
----
-
-## 🔑 Demo credentials
-
-All passwords are `password123`.
-
-| Role            | Email                  | What you can do                                       |
-|-----------------|------------------------|-------------------------------------------------------|
-| Donor           | anushka@example.com    | See urgent requests, pledge, manage profile           |
-| Donor           | vikram@example.com     | Same as above; he's already pledged to one request    |
-| Requester       | rohit@example.com      | Create requests, watch live progress, cancel          |
-| Bank admin (GMC)| rashmi@gmc.in          | Manage inventory, fulfil requests, schedule donors    |
-| Bank admin (Apollo)| admin@apollo.in     | Same as above for Apollo Hospitals Blood Centre       |
-
-A login form on `/login` lists these for convenience.
-
----
 
 ## 🗺 Project structure
 
@@ -183,8 +163,7 @@ The UI was first designed as an interactive React + Tailwind prototype (10 scree
 The production EJS templates reuse the same color palette, typography (Inter), component vocabulary (blood-group badge, urgency badge, KPI card, status timeline) and CSS animations (`rs-pulse`, `rs-ping`, `rs-float`).
 
 ---
-
-## 💼 What's interesting to talk about in an interview
+Insteresting Features
 
 - The **real-time matching pattern**: the `eventEmitter` → Socket.io rooms abstraction lets controllers stay HTTP-shaped while still pushing live updates.
 - The **compatibility matrix**: small algorithmic piece that takes a recipient group and returns the set of donor groups that can supply it, used both to filter the donor's feed and at request-creation time.
