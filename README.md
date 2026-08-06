@@ -175,4 +175,4 @@ Insteresting Features
 
 ## 📜 License
 
-MIT.
+MIT
